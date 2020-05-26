@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strings"
 
 	types "github.com/Leapforce-nl/go_types"
@@ -100,4 +101,23 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, error)
 	}
 
 	return response.NextPage, &response, nil
+}
+
+// GetJSONTaggedFieldNames returns comma separated string of
+// fieldnames of struct having a json tag
+//
+func GetJSONTaggedFieldNames(model interface{}) string {
+	val := reflect.ValueOf(model)
+	list := ""
+	for i := 0; i < val.Type().NumField(); i++ {
+		field := val.Type().Field(i)
+		tag := field.Tag.Get("json")
+		if tag != "" {
+			list += "," + tag
+		}
+	}
+
+	list = strings.Trim(list, ",")
+
+	return list
 }
