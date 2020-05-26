@@ -112,14 +112,14 @@ func (i *Asana) GetTasksBatched(projectID string) ([]Task, error) {
 		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
 
 		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Task{}))
-		fmt.Println(url)
+		//fmt.Println(url)
 
 		nextPage, err := i.GetTasksInternal(url, &tasks)
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Println(len(tasks))
+		//fmt.Println(len(tasks))
 
 		/*ts := []Task{}
 
