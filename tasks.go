@@ -76,21 +76,21 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task) (*NextPage, error) {
 	}
 
 	if tasks != nil {
-		tasks2 := *tasks
+		//tasks2 := *tasks
 		//fmt.Println("len(tasks2)", len(tasks2))
 
 		for _, t := range ts {
-			tasks2 = append(tasks2, t)
+			*tasks = append(*tasks, t)
 
 			if t.NumSubtasks > 0 {
 				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, GetJSONTaggedFieldNames(Task{}))
-				i.GetTasksInternal(urlSub, &tasks2)
+				i.GetTasksInternal(urlSub, tasks)
 				//fmt.Println("t.NumSubtasks", t.NumSubtasks)
 			}
 		}
 		//fmt.Println("len(tasks2)", len(tasks2))
 
-		*tasks = tasks2
+		//*tasks = tasks2
 	}
 
 	return nextPage, nil
