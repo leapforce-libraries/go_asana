@@ -49,11 +49,41 @@ type Task struct {
 
 // GetTasksByProjectID returns all tasks for a specific project
 //
-func (i *Asana) GetTasksByProjectID(projectID string) ([]Task, error) {
-	return i.GetTasksBatched(projectID)
+func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string) ([]Task, error) {
+	urlStr := "%stasks?project=%s&limit=%s%s&opt_fields=%s"
+	limit := 100
+	offset := ""
+	//rowCount := limit
+	batch := 0
+
+	tasks := []Task{}
+
+	for batch == 0 || offset != "" {
+		batch++
+		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
+
+		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Task{}))
+		//fmt.Println(url)
+
+		nextPage, err := i.GetTasksInternal(url, &tasks, projectIDsDone, false)
+		if err != nil {
+			return nil, err
+		}
+
+		offset = ""
+		if nextPage != nil {
+			offset = fmt.Sprintf("&offset=%s", nextPage.Offset)
+		}
+	}
+
+	if len(tasks) == 0 {
+		tasks = nil
+	}
+
+	return tasks, nil
 }
 
-func (i *Asana) GetTasksInternal(url string, tasks *[]Task) (*NextPage, error) {
+func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, error) {
 	urlSubStr := "%stasks/%s/subtasks?opt_fields=%s"
 
 	ts := []Task{}
@@ -80,11 +110,39 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task) (*NextPage, error) {
 		//fmt.Println("len(tasks2)", len(tasks2))
 
 		for _, t := range ts {
+			taskFound := false
+
+			if projectIDsDone != nil {
+				if len(*projectIDsDone) > 0 {
+				out:
+					for _, proj := range t.Projects {
+						for _, pid := range *projectIDsDone {
+							if proj.ID == pid {
+								taskFound = true
+								break out
+							}
+						}
+					}
+
+					if taskFound {
+						fmt.Println("duplicate TaskID: ", t.ID)
+						continue
+					}
+				}
+			}
+
+			if !subtasks {
+				if t.Parent.ResourceType != "project" && t.Parent.ResourceType != "" {
+					fmt.Println("invalid Parent.ResourceType: ", t.Parent.ResourceType)
+					continue
+				}
+			}
+
 			*tasks = append(*tasks, t)
 
 			if t.NumSubtasks > 0 {
 				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, GetJSONTaggedFieldNames(Task{}))
-				i.GetTasksInternal(urlSub, tasks)
+				i.GetTasksInternal(urlSub, tasks, projectIDsDone, true)
 				//fmt.Println("t.NumSubtasks", t.NumSubtasks)
 			}
 		}
@@ -94,66 +152,4 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task) (*NextPage, error) {
 	}
 
 	return nextPage, nil
-}
-
-// GetTasksInternal is the generic function retrieving tasks from Asana
-//
-func (i *Asana) GetTasksBatched(projectID string) ([]Task, error) {
-	urlStr := "%stasks?project=%s&limit=%s%s&opt_fields=%s"
-	limit := 100
-	offset := ""
-	//rowCount := limit
-	batch := 0
-
-	tasks := []Task{}
-
-	for batch == 0 || offset != "" {
-		batch++
-		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
-
-		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Task{}))
-		//fmt.Println(url)
-
-		nextPage, err := i.GetTasksInternal(url, &tasks)
-		if err != nil {
-			return nil, err
-		}
-
-		//fmt.Println(len(tasks))
-
-		/*ts := []Task{}
-
-		nextPage, response, err := i.Get(url, &ts)
-		if err != nil {
-			return nil, err
-		}
-
-		if response != nil {
-			if response.Errors != nil {
-				for _, e := range *response.Errors {
-					message := fmt.Sprintf("Error for ProjectID %v: %v", projectID, e.Message)
-					if i.IsLive {
-						sentry.CaptureMessage(message)
-					}
-					fmt.Println(message)
-				}
-			}
-		}
-
-		for _, t := range ts {
-			tasks = append(tasks, t)
-		}*/
-
-		//rowCount = len(ts)
-		offset = ""
-		if nextPage != nil {
-			offset = fmt.Sprintf("&offset=%s", nextPage.Offset)
-		}
-	}
-
-	if len(tasks) == 0 {
-		tasks = nil
-	}
-
-	return tasks, nil
 }
