@@ -3,6 +3,7 @@ package asana
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	sentry "github.com/getsentry/sentry-go"
 )
@@ -49,8 +50,8 @@ type Task struct {
 
 // GetTasksByProjectID returns all tasks for a specific project
 //
-func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string) ([]Task, error) {
-	urlStr := "%stasks?project=%s&limit=%s%s&opt_fields=%s"
+func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, error) {
+	urlStr := "%stasks?project=%s&limit=%s%s&opt_fields=%s%s"
 	limit := 100
 	offset := ""
 	//rowCount := limit
@@ -62,7 +63,12 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string) 
 		batch++
 		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Task{}))
+		_modifiedSince := ""
+		if modifiedSince != nil {
+			_modifiedSince = fmt.Sprintf("&modified_since=%s", modifiedSince.Format("2006-01-02T15:04:05"))
+		}
+
+		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Task{}), _modifiedSince)
 		//fmt.Println(url)
 
 		nextPage, err := i.GetTasksInternal(url, &tasks, projectIDsDone, false)
