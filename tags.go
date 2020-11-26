@@ -3,7 +3,8 @@ package asana
 import (
 	"fmt"
 
-	sentry "github.com/getsentry/sentry-go"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // Tag stores Tag from Asana
@@ -19,30 +20,20 @@ type Tag struct {
 
 // GetTags returns all tags
 //
-func (i *Asana) GetTags() ([]Tag, error) {
+func (i *Asana) GetTags() ([]Tag, *errortools.Error) {
 	urlStr := "%stags?opt_fields=%s"
 
 	tags := []Tag{}
 
-	url := fmt.Sprintf(urlStr, i.ApiURL, GetJSONTaggedFieldNames(Tag{}))
+	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedFieldNames("json", Tag{}))
 	//fmt.Println(url)
 
-	_, response, err := i.Get(url, &tags)
-	if err != nil {
-		return nil, err
+	_, response, e := i.Get(url, &tags)
+	if e != nil {
+		return nil, e
 	}
 
-	if response != nil {
-		if response.Errors != nil {
-			for _, e := range *response.Errors {
-				message := fmt.Sprintf("Error in %v: %v", url, e.Message)
-				if i.IsLive {
-					sentry.CaptureMessage(message)
-				}
-				fmt.Println(message)
-			}
-		}
-	}
+	i.captureErrors(response)
 
 	return tags, nil
 }

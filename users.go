@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	sentry "github.com/getsentry/sentry-go"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // User stores User from Asana
@@ -30,13 +32,13 @@ type Photo struct {
 
 // GetUsersByWorkspaceID returns all users for a specific workspace
 //
-func (i *Asana) GetUsersByWorkspaceID(workspaceID string) ([]User, error) {
+func (i *Asana) GetUsersByWorkspaceID(workspaceID string) ([]User, *errortools.Error) {
 	return i.GetUsersInternal(workspaceID)
 }
 
 // GetUsersInternal is the generic function retrieving users from Asana
 //
-func (i *Asana) GetUsersInternal(workspaceID string) ([]User, error) {
+func (i *Asana) GetUsersInternal(workspaceID string) ([]User, *errortools.Error) {
 	urlStr := "%sworkspaces/%s/users?limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
@@ -49,14 +51,14 @@ func (i *Asana) GetUsersInternal(workspaceID string) ([]User, error) {
 		batch++
 		//fmt.Printf("Batch %v for WorkspaceID %v\n", batch, workspaceID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(User{}))
+		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", User{}))
 		//fmt.Println(url)
 
 		ts := []User{}
 
-		nextPage, response, err := i.Get(url, &ts)
-		if err != nil {
-			return nil, err
+		nextPage, response, e := i.Get(url, &ts)
+		if e != nil {
+			return nil, e
 		}
 
 		if response != nil {

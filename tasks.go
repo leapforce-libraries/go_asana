@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	sentry "github.com/getsentry/sentry-go"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // Task stores Task from Asana
@@ -50,7 +51,7 @@ type Task struct {
 
 // GetTasksByProjectID returns all tasks for a specific project
 //
-func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, error) {
+func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, *errortools.Error) {
 	urlStr := "%stasks?project=%s&limit=%s%s&opt_fields=%s%s"
 	limit := 100
 	offset := ""
@@ -68,12 +69,12 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 			_modifiedSince = fmt.Sprintf("&modified_since=%s", modifiedSince.Format("2006-01-02T15:04:05"))
 		}
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Task{}), _modifiedSince)
+		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", Task{}), _modifiedSince)
 		//fmt.Println(url)
 
-		nextPage, err := i.GetTasksInternal(url, &tasks, projectIDsDone, false)
-		if err != nil {
-			return nil, err
+		nextPage, e := i.GetTasksInternal(url, &tasks, projectIDsDone, false)
+		if e != nil {
+			return nil, e
 		}
 
 		offset = ""
@@ -89,27 +90,17 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 	return tasks, nil
 }
 
-func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, error) {
+func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, *errortools.Error) {
 	urlSubStr := "%stasks/%s/subtasks?opt_fields=%s"
 
 	ts := []Task{}
 
-	nextPage, response, err := i.Get(url, &ts)
-	if err != nil {
-		return nil, err
+	nextPage, response, e := i.Get(url, &ts)
+	if e != nil {
+		return nil, e
 	}
 
-	if response != nil {
-		if response.Errors != nil {
-			for _, e := range *response.Errors {
-				message := fmt.Sprintf("Error for %v: %v", url, e.Message)
-				if i.IsLive {
-					sentry.CaptureMessage(message)
-				}
-				fmt.Println(message)
-			}
-		}
-	}
+	i.captureErrors(response)
 
 	if tasks != nil {
 		//tasks2 := *tasks
@@ -147,14 +138,13 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 			*tasks = append(*tasks, t)
 
 			if t.NumSubtasks > 0 {
-				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, GetJSONTaggedFieldNames(Task{}))
-				i.GetTasksInternal(urlSub, tasks, projectIDsDone, true)
-				//fmt.Println("t.NumSubtasks", t.NumSubtasks)
+				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, utilities.GetTaggedFieldNames("json", Task{}))
+				_, e := i.GetTasksInternal(urlSub, tasks, projectIDsDone, true)
+				if e != nil {
+					return nil, e
+				}
 			}
 		}
-		//fmt.Println("len(tasks2)", len(tasks2))
-
-		//*tasks = tasks2
 	}
 
 	return nextPage, nil

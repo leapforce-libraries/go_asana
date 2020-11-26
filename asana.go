@@ -2,12 +2,13 @@ package asana
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 	"strings"
 
-	types "github.com/Leapforce-nl/go_types"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // type
@@ -41,14 +42,14 @@ type AsanaError struct {
 	Help    string `json:"help"`
 }
 
-func New(apiURL string, bearerToken string, isLive bool) (*Asana, error) {
+func New(apiURL string, bearerToken string, isLive bool) (*Asana, *errortools.Error) {
 	i := new(Asana)
 
 	if apiURL == "" {
-		return nil, &types.ErrorString{"Asana ApiUrl not provided"}
+		return nil, errortools.ErrorMessage("Asana ApiUrl not provided")
 	}
 	if bearerToken == "" {
-		return nil, &types.ErrorString{"Asana Token not provided"}
+		return nil, errortools.ErrorMessage("Asana Token not provided")
 	}
 
 	i.ApiURL = apiURL
@@ -64,20 +65,26 @@ func New(apiURL string, bearerToken string, isLive bool) (*Asana, error) {
 
 // generic Get method
 //
-func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, error) {
+func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, *errortools.Error) {
 	client := &http.Client{}
 
+	e := new(errortools.Error)
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
+	e.SetRequest(req)
 	if err != nil {
-		return nil, nil, err
+		e.SetMessage(err)
+		return nil, nil, e
 	}
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("authorization", "Bearer "+i.BearerToken)
 
 	// Send out the HTTP request
-	res, err := client.Do(req)
+	res, err := utilities.DoWithRetry(client, req, 10, 5)
+	e.SetResponse(res)
 	if err != nil {
-		return nil, nil, err
+		e.SetMessage(err)
+		return nil, nil, e
 	}
 
 	defer res.Body.Close()
@@ -88,7 +95,8 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, error)
 
 	err = json.Unmarshal(b, &response)
 	if err != nil {
-		return nil, &response, err
+		e.SetMessage(err)
+		return nil, nil, e
 	}
 
 	if response.Data == nil {
@@ -97,27 +105,20 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, error)
 
 	err = json.Unmarshal(*response.Data, &model)
 	if err != nil {
-		return nil, &response, err
+		e.SetMessage(err)
+		return nil, nil, e
 	}
 
 	return response.NextPage, &response, nil
 }
 
-// GetJSONTaggedFieldNames returns comma separated string of
-// fieldnames of struct having a json tag
-//
-func GetJSONTaggedFieldNames(model interface{}) string {
-	val := reflect.ValueOf(model)
-	list := ""
-	for i := 0; i < val.Type().NumField(); i++ {
-		field := val.Type().Field(i)
-		tag := field.Tag.Get("json")
-		if tag != "" {
-			list += "," + tag
+func (a *Asana) captureErrors(response *Response) {
+	if response != nil {
+		if response.Errors != nil {
+			b, err := json.Marshal(*response.Errors)
+			if err == nil {
+				errortools.CaptureMessage(fmt.Sprintf("%s", b), a.IsLive)
+			}
 		}
 	}
-
-	list = strings.Trim(list, ",")
-
-	return list
 }

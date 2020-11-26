@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	sentry "github.com/getsentry/sentry-go"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // Team stores Team from Asana
@@ -20,13 +22,13 @@ type Team struct {
 
 // GetTeamsByWorkspaceID returns all teams for a specific team
 //
-func (i *Asana) GetTeamsByWorkspaceID(workspaceID string) ([]Team, error) {
+func (i *Asana) GetTeamsByWorkspaceID(workspaceID string) ([]Team, *errortools.Error) {
 	return i.GetTeamsInternal(workspaceID)
 }
 
 // GetTeamsInternal is the generic function retrieving teams from Asana
 //
-func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, error) {
+func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, *errortools.Error) {
 	urlStr := "%sorganizations/%s/teams?limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
@@ -39,14 +41,14 @@ func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, error) {
 		batch++
 		//fmt.Printf("Batch %v for WorkspaceID %v\n", batch, workspaceID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Team{}))
+		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", Team{}))
 		//fmt.Println(url)
 
 		ts := []Team{}
 
-		nextPage, response, err := i.Get(url, &ts)
-		if err != nil {
-			return nil, err
+		nextPage, response, e := i.Get(url, &ts)
+		if e != nil {
+			return nil, e
 		}
 
 		if response != nil {

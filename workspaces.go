@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	sentry "github.com/getsentry/sentry-go"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // Workspace stores Workspace from Asana
@@ -19,13 +21,13 @@ type Workspace struct {
 
 // GetWorkspacesByProjectID returns all workspaces for a specific project
 //
-func (i *Asana) GetWorkspaces() ([]Workspace, error) {
+func (i *Asana) GetWorkspaces() ([]Workspace, *errortools.Error) {
 	return i.GetWorkspacesInternal()
 }
 
 // GetWorkspacesInternal is the generic function retrieving workspaces from Asana
 //
-func (i *Asana) GetWorkspacesInternal() ([]Workspace, error) {
+func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
 	urlStr := "%sworkspaces?limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
@@ -38,14 +40,14 @@ func (i *Asana) GetWorkspacesInternal() ([]Workspace, error) {
 		batch++
 		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, strconv.Itoa(limit), offset, GetJSONTaggedFieldNames(Workspace{}))
+		url := fmt.Sprintf(urlStr, i.ApiURL, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", Workspace{}))
 		//fmt.Println(url)
 
 		ts := []Workspace{}
 
-		nextPage, response, err := i.Get(url, &ts)
-		if err != nil {
-			return nil, err
+		nextPage, response, e := i.Get(url, &ts)
+		if e != nil {
+			return nil, e
 		}
 
 		if response != nil {

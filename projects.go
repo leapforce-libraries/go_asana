@@ -3,7 +3,8 @@ package asana
 import (
 	"fmt"
 
-	sentry "github.com/getsentry/sentry-go"
+	errortools "github.com/leapforce-libraries/go_errortools"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 // Project stores Project from Asana
@@ -37,30 +38,20 @@ type Project struct {
 
 // GetProjects returns all projects
 //
-func (i *Asana) GetProjects() ([]Project, error) {
+func (i *Asana) GetProjects() ([]Project, *errortools.Error) {
 	urlStr := "%sprojects?opt_fields=%s"
 
 	projects := []Project{}
 
-	url := fmt.Sprintf(urlStr, i.ApiURL, GetJSONTaggedFieldNames(Project{}))
+	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedFieldNames("json", Project{}))
 	//fmt.Println(url)
 
-	_, response, err := i.Get(url, &projects)
-	if err != nil {
-		return nil, err
+	_, response, e := i.Get(url, &projects)
+	if e != nil {
+		return nil, e
 	}
 
-	if response != nil {
-		if response.Errors != nil {
-			for _, e := range *response.Errors {
-				message := fmt.Sprintf("Error in %v: %v", url, e.Message)
-				if i.IsLive {
-					sentry.CaptureMessage(message)
-				}
-				fmt.Println(message)
-			}
-		}
-	}
+	i.captureErrors(response)
 
 	return projects, nil
 }
