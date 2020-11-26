@@ -51,7 +51,7 @@ func (i *Asana) GetProjects() ([]Project, *errortools.Error) {
 		return nil, e
 	}
 
-	i.captureErrors(response)
+	i.captureErrors(e, response)
 
 	return projects, nil
 }

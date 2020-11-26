@@ -49,7 +49,7 @@ func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
 			return nil, e
 		}
 
-		i.captureErrors(response)
+		i.captureErrors(e, response)
 
 		for _, t := range ts {
 			workspaces = append(workspaces, t)

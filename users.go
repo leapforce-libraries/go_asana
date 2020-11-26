@@ -60,7 +60,7 @@ func (i *Asana) GetUsersInternal(workspaceID string) ([]User, *errortools.Error)
 			return nil, e
 		}
 
-		i.captureErrors(response)
+		i.captureErrors(e, response)
 
 		for _, t := range ts {
 			users = append(users, t)
