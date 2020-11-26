@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	sentry "github.com/getsentry/sentry-go"
 	errortools "github.com/leapforce-libraries/go_errortools"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
@@ -61,17 +60,7 @@ func (i *Asana) GetUsersInternal(workspaceID string) ([]User, *errortools.Error)
 			return nil, e
 		}
 
-		if response != nil {
-			if response.Errors != nil {
-				for _, e := range *response.Errors {
-					message := fmt.Sprintf("Error for WorkspaceID %v: %v", workspaceID, e.Message)
-					if i.IsLive {
-						sentry.CaptureMessage(message)
-					}
-					fmt.Println(message)
-				}
-			}
-		}
+		i.captureErrors(response)
 
 		for _, t := range ts {
 			users = append(users, t)
