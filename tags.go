@@ -33,7 +33,7 @@ func (i *Asana) GetTags() ([]Tag, *errortools.Error) {
 		return nil, e
 	}
 
-	i.captureErrors(e, response)
+	i.captureErrors(url, response)
 
 	return tags, nil
 }

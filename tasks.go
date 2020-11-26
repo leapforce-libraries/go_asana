@@ -100,7 +100,7 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 		return nil, e
 	}
 
-	i.captureErrors(e, response)
+	i.captureErrors(url, response)
 
 	if tasks != nil {
 		//tasks2 := *tasks

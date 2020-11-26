@@ -50,7 +50,7 @@ func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, *errortools.Error)
 			return nil, e
 		}
 
-		i.captureErrors(e, response)
+		i.captureErrors(url, response)
 
 		for _, t := range ts {
 			teams = append(teams, t)

@@ -112,7 +112,7 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, *error
 	return response.NextPage, &response, nil
 }
 
-func (a *Asana) captureErrors(e *errortools.Error, response *Response) {
+func (a *Asana) captureErrors(url string, response *Response) {
 	if response != nil {
 		if response.Errors != nil {
 			ee := []string{}
@@ -120,8 +120,10 @@ func (a *Asana) captureErrors(e *errortools.Error, response *Response) {
 				ee = append(ee, fmt.Sprintf("%s\n%s", err.Message, err.Help))
 			}
 
-			e.SetMessage(strings.Join(ee, "\n\n"))
+			e := errortools.ErrorMessage(strings.Join(ee, "\n\n"))
+			errortools.SetExtra("url", url)
 			errortools.CaptureMessage(e, a.IsLive)
+			errortools.RemoveExtra("url")
 		}
 	}
 }
