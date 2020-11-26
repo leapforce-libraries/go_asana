@@ -112,13 +112,16 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, *error
 	return response.NextPage, &response, nil
 }
 
-func (a *Asana) captureErrors(response *Response) {
+func (a *Asana) captureErrors(e *errortools.Error, response *Response) {
 	if response != nil {
 		if response.Errors != nil {
-			b, err := json.Marshal(*response.Errors)
-			if err == nil {
-				errortools.CaptureMessage(fmt.Sprintf("%s", b), a.IsLive)
+			ee := []string{}
+			for _, err := range *response.Errors {
+				ee = append(ee, fmt.Sprintf("%s\n%s", err.Message, err.Help))
 			}
+
+			e.SetMessage(strings.Join(ee, "\n\n"))
+			errortools.CaptureMessage(e, a.IsLive)
 		}
 	}
 }
