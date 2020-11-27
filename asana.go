@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
@@ -87,6 +88,10 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, *error
 		return nil, nil, e
 	}
 
+	if res == nil {
+		return nil, nil, nil
+	}
+
 	defer res.Body.Close()
 
 	b, err := ioutil.ReadAll(res.Body)
@@ -99,20 +104,20 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, *error
 		return nil, nil, e
 	}
 
-	if response.Data == nil {
-		return nil, &response, nil
+	if response.Data != nil {
+		err = json.Unmarshal(*response.Data, &model)
+		if err != nil {
+			e.SetMessage(err)
+			return nil, nil, e
+		}
 	}
 
-	err = json.Unmarshal(*response.Data, &model)
-	if err != nil {
-		e.SetMessage(err)
-		return nil, nil, e
-	}
+	i.captureErrors(res.StatusCode, url, &response)
 
 	return response.NextPage, &response, nil
 }
 
-func (a *Asana) captureErrors(url string, response *Response) {
+func (a *Asana) captureErrors(responseStatusCode int, url string, response *Response) {
 	if response != nil {
 		if response.Errors != nil {
 			ee := []string{}
@@ -121,6 +126,7 @@ func (a *Asana) captureErrors(url string, response *Response) {
 			}
 
 			e := errortools.ErrorMessage(strings.Join(ee, "\n\n"))
+			e.SetExtra("response_status_code", strconv.Itoa(responseStatusCode))
 			e.SetExtra("url", url)
 			errortools.CaptureMessage(e, a.IsLive)
 		}

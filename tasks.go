@@ -95,12 +95,10 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 
 	ts := []Task{}
 
-	nextPage, response, e := i.Get(url, &ts)
+	nextPage, _, e := i.Get(url, &ts)
 	if e != nil {
 		return nil, e
 	}
-
-	i.captureErrors(url, response)
 
 	if tasks != nil {
 		//tasks2 := *tasks

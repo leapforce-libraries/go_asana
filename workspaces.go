@@ -44,12 +44,10 @@ func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
 
 		ts := []Workspace{}
 
-		nextPage, response, e := i.Get(url, &ts)
+		nextPage, _, e := i.Get(url, &ts)
 		if e != nil {
 			return nil, e
 		}
-
-		i.captureErrors(url, response)
 
 		for _, t := range ts {
 			workspaces = append(workspaces, t)
