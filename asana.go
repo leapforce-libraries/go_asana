@@ -121,9 +121,8 @@ func (a *Asana) captureErrors(url string, response *Response) {
 			}
 
 			e := errortools.ErrorMessage(strings.Join(ee, "\n\n"))
-			errortools.SetExtra("url", url)
+			e.SetExtra("url", url)
 			errortools.CaptureMessage(e, a.IsLive)
-			errortools.RemoveExtra("url")
 		}
 	}
 }
