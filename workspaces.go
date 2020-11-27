@@ -39,7 +39,7 @@ func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
 		batch++
 		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", Workspace{}))
+		url := fmt.Sprintf(urlStr, i.ApiURL, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Workspace{}))
 		//fmt.Println(url)
 
 		ts := []Workspace{}

@@ -43,7 +43,7 @@ func (i *Asana) GetProjects() ([]Project, *errortools.Error) {
 
 	projects := []Project{}
 
-	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedFieldNames("json", Project{}))
+	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedTagNames("json", Project{}))
 	//fmt.Println(url)
 
 	_, response, e := i.Get(url, &projects)

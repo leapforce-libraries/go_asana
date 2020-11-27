@@ -69,7 +69,7 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 			_modifiedSince = fmt.Sprintf("&modified_since=%s", modifiedSince.Format("2006-01-02T15:04:05"))
 		}
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", Task{}), _modifiedSince)
+		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Task{}), _modifiedSince)
 		//fmt.Println(url)
 
 		nextPage, e := i.GetTasksInternal(url, &tasks, projectIDsDone, false)
@@ -138,7 +138,7 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 			*tasks = append(*tasks, t)
 
 			if t.NumSubtasks > 0 {
-				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, utilities.GetTaggedFieldNames("json", Task{}))
+				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, utilities.GetTaggedTagNames("json", Task{}))
 				_, e := i.GetTasksInternal(urlSub, tasks, projectIDsDone, true)
 				if e != nil {
 					return nil, e

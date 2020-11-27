@@ -40,7 +40,7 @@ func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, *errortools.Error)
 		batch++
 		//fmt.Printf("Batch %v for WorkspaceID %v\n", batch, workspaceID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", Team{}))
+		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Team{}))
 		//fmt.Println(url)
 
 		ts := []Team{}

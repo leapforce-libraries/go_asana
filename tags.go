@@ -25,7 +25,7 @@ func (i *Asana) GetTags() ([]Tag, *errortools.Error) {
 
 	tags := []Tag{}
 
-	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedFieldNames("json", Tag{}))
+	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedTagNames("json", Tag{}))
 	//fmt.Println(url)
 
 	_, response, e := i.Get(url, &tags)

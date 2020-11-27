@@ -50,7 +50,7 @@ func (i *Asana) GetUsersInternal(workspaceID string) ([]User, *errortools.Error)
 		batch++
 		//fmt.Printf("Batch %v for WorkspaceID %v\n", batch, workspaceID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedFieldNames("json", User{}))
+		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", User{}))
 		//fmt.Println(url)
 
 		ts := []User{}
