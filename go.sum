@@ -101,6 +101,10 @@ github.com/leapforce-libraries/go_utilities v0.0.0-20201102125031-858dcf5b1a85 h
 github.com/leapforce-libraries/go_utilities v0.0.0-20201102125031-858dcf5b1a85/go.mod h1:ESDsQRfPC+Xg1UIa8AebkB0seY2m4g+kUFI82sh9gkg=
 github.com/leapforce-libraries/go_utilities v0.0.0-20201126223955-19b2ac9c1efa h1:nPlDfUCH+81in/G4E4QHYe76JfsbqJL6UWTH5as+Eak=
 github.com/leapforce-libraries/go_utilities v0.0.0-20201126223955-19b2ac9c1efa/go.mod h1:ESDsQRfPC+Xg1UIa8AebkB0seY2m4g+kUFI82sh9gkg=
+github.com/leapforce-libraries/go_utilities v0.0.0-20201127110739-93c492166c2b h1:u/yPRUc1Efr1XvMyyjNXt/+k32Fse9GFv56qT9AsfvI=
+github.com/leapforce-libraries/go_utilities v0.0.0-20201127110739-93c492166c2b/go.mod h1:ESDsQRfPC+Xg1UIa8AebkB0seY2m4g+kUFI82sh9gkg=
+github.com/leapforce-libraries/go_utilities v0.0.0-20201127111410-5260e391a3bc h1:nu8WgwVG7BU9zPnIRi1YWeV9ElJ+7xKGe/TZK7X+3oQ=
+github.com/leapforce-libraries/go_utilities v0.0.0-20201127111410-5260e391a3bc/go.mod h1:ESDsQRfPC+Xg1UIa8AebkB0seY2m4g+kUFI82sh9gkg=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-isatty v0.0.7/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=

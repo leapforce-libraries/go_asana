@@ -81,7 +81,7 @@ func (i *Asana) Get(url string, model interface{}) (*NextPage, *Response, *error
 	req.Header.Set("authorization", "Bearer "+i.BearerToken)
 
 	// Send out the HTTP request
-	res, err := utilities.DoWithRetry(client, req, 10, 5)
+	res, err := utilities.DoWithRetry(client, req, 10, 3)
 	e.SetResponse(res)
 	if err != nil {
 		e.SetMessage(err)
