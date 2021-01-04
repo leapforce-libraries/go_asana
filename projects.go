@@ -39,14 +39,14 @@ type Project struct {
 // GetProjects returns all projects
 //
 func (i *Asana) GetProjects() ([]Project, *errortools.Error) {
-	urlStr := "%sprojects?opt_fields=%s"
+	urlStr := "projects?opt_fields=%s"
 
 	projects := []Project{}
 
-	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedTagNames("json", Project{}))
+	urlPath := fmt.Sprintf(urlStr, utilities.GetTaggedTagNames("json", Project{}))
 	//fmt.Println(url)
 
-	_, _, _, e := i.Get(url, &projects)
+	_, _, _, e := i.Get(urlPath, &projects)
 	if e != nil {
 		return nil, e
 	}

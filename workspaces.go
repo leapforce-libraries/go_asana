@@ -21,13 +21,13 @@ type Workspace struct {
 // GetWorkspacesByProjectID returns all workspaces for a specific project
 //
 func (i *Asana) GetWorkspaces() ([]Workspace, *errortools.Error) {
-	return i.GetWorkspacesInternal()
+	return i.getWorkspacesInternal()
 }
 
-// GetWorkspacesInternal is the generic function retrieving workspaces from Asana
+// getWorkspacesInternal is the generic function retrieving workspaces from Asana
 //
-func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
-	urlStr := "%sworkspaces?limit=%s%s&opt_fields=%s"
+func (i *Asana) getWorkspacesInternal() ([]Workspace, *errortools.Error) {
+	urlStr := "workspaces?limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
 	//rowCount := limit
@@ -39,12 +39,12 @@ func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
 		batch++
 		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Workspace{}))
+		urlPath := fmt.Sprintf(urlStr, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Workspace{}))
 		//fmt.Println(url)
 
 		ts := []Workspace{}
 
-		_, _, nextPage, e := i.Get(url, &ts)
+		_, _, nextPage, e := i.Get(urlPath, &ts)
 		if e != nil {
 			return nil, e
 		}

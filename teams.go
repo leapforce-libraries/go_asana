@@ -22,13 +22,13 @@ type Team struct {
 // GetTeamsByWorkspaceID returns all teams for a specific team
 //
 func (i *Asana) GetTeamsByWorkspaceID(workspaceID string) ([]Team, *errortools.Error) {
-	return i.GetTeamsInternal(workspaceID)
+	return i.getTeamsInternal(workspaceID)
 }
 
-// GetTeamsInternal is the generic function retrieving teams from Asana
+// getTeamsInternal is the generic function retrieving teams from Asana
 //
-func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, *errortools.Error) {
-	urlStr := "%sorganizations/%s/teams?limit=%s%s&opt_fields=%s"
+func (i *Asana) getTeamsInternal(workspaceID string) ([]Team, *errortools.Error) {
+	urlStr := "organizations/%s/teams?limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
 	//rowCount := limit
@@ -40,12 +40,12 @@ func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, *errortools.Error)
 		batch++
 		//fmt.Printf("Batch %v for WorkspaceID %v\n", batch, workspaceID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Team{}))
+		urlPath := fmt.Sprintf(urlStr, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Team{}))
 		//fmt.Println(url)
 
 		ts := []Team{}
 
-		_, _, nextPage, e := i.Get(url, &ts)
+		_, _, nextPage, e := i.Get(urlPath, &ts)
 		if e != nil {
 			return nil, e
 		}

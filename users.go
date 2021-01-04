@@ -32,13 +32,13 @@ type Photo struct {
 // GetUsersByWorkspaceID returns all users for a specific workspace
 //
 func (i *Asana) GetUsersByWorkspaceID(workspaceID string) ([]User, *errortools.Error) {
-	return i.GetUsersInternal(workspaceID)
+	return i.getUsersInternal(workspaceID)
 }
 
-// GetUsersInternal is the generic function retrieving users from Asana
+// getUsersInternal is the generic function retrieving users from Asana
 //
-func (i *Asana) GetUsersInternal(workspaceID string) ([]User, *errortools.Error) {
-	urlStr := "%sworkspaces/%s/users?limit=%s%s&opt_fields=%s"
+func (i *Asana) getUsersInternal(workspaceID string) ([]User, *errortools.Error) {
+	urlStr := "workspaces/%s/users?limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
 	//rowCount := limit
@@ -50,12 +50,12 @@ func (i *Asana) GetUsersInternal(workspaceID string) ([]User, *errortools.Error)
 		batch++
 		//fmt.Printf("Batch %v for WorkspaceID %v\n", batch, workspaceID)
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", User{}))
+		urlPath := fmt.Sprintf(urlStr, workspaceID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", User{}))
 		//fmt.Println(url)
 
 		ts := []User{}
 
-		_, _, nextPage, e := i.Get(url, &ts)
+		_, _, nextPage, e := i.Get(urlPath, &ts)
 		if e != nil {
 			return nil, e
 		}

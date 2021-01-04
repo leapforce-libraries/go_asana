@@ -21,14 +21,14 @@ type Tag struct {
 // GetTags returns all tags
 //
 func (i *Asana) GetTags() ([]Tag, *errortools.Error) {
-	urlStr := "%stags?opt_fields=%s"
+	urlStr := "tags?opt_fields=%s"
 
 	tags := []Tag{}
 
-	url := fmt.Sprintf(urlStr, i.ApiURL, utilities.GetTaggedTagNames("json", Tag{}))
+	urlPath := fmt.Sprintf(urlStr, utilities.GetTaggedTagNames("json", Tag{}))
 	//fmt.Println(url)
 
-	_, _, _, e := i.Get(url, &tags)
+	_, _, _, e := i.Get(urlPath, &tags)
 	if e != nil {
 		return nil, e
 	}

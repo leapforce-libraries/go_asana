@@ -52,7 +52,7 @@ type Task struct {
 // GetTasksByProjectID returns all tasks for a specific project
 //
 func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, *errortools.Error) {
-	urlStr := "%stasks?project=%s&limit=%s%s&opt_fields=%s%s"
+	urlStr := "tasks?project=%s&limit=%s%s&opt_fields=%s%s"
 	limit := 100
 	offset := ""
 	//rowCount := limit
@@ -69,10 +69,10 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 			_modifiedSince = fmt.Sprintf("&modified_since=%s", modifiedSince.Format("2006-01-02T15:04:05"))
 		}
 
-		url := fmt.Sprintf(urlStr, i.ApiURL, projectID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Task{}), _modifiedSince)
+		urlPath := fmt.Sprintf(urlStr, projectID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Task{}), _modifiedSince)
 		//fmt.Println(url)
 
-		nextPage, e := i.GetTasksInternal(url, &tasks, projectIDsDone, false)
+		nextPage, e := i.getTasksInternal(urlPath, &tasks, projectIDsDone, false)
 		if e != nil {
 			return nil, e
 		}
@@ -90,8 +90,8 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 	return tasks, nil
 }
 
-func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, *errortools.Error) {
-	urlSubStr := "%stasks/%s/subtasks?opt_fields=%s"
+func (i *Asana) getTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, *errortools.Error) {
+	urlSubStr := "tasks/%s/subtasks?opt_fields=%s"
 
 	ts := []Task{}
 
@@ -101,9 +101,6 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 	}
 
 	if tasks != nil {
-		//tasks2 := *tasks
-		//fmt.Println("len(tasks2)", len(tasks2))
-
 		for _, t := range ts {
 			taskFound := false
 
@@ -136,8 +133,8 @@ func (i *Asana) GetTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 			*tasks = append(*tasks, t)
 
 			if t.NumSubtasks > 0 {
-				urlSub := fmt.Sprintf(urlSubStr, i.ApiURL, t.ID, utilities.GetTaggedTagNames("json", Task{}))
-				_, e := i.GetTasksInternal(urlSub, tasks, projectIDsDone, true)
+				urlSub := fmt.Sprintf(urlSubStr, t.ID, utilities.GetTaggedTagNames("json", Task{}))
+				_, e := i.getTasksInternal(urlSub, tasks, projectIDsDone, true)
 				if e != nil {
 					return nil, e
 				}

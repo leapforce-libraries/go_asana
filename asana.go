@@ -8,18 +8,20 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"strings"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
+const (
+	APIName string = "Asana"
+	APIURL  string = "https://app.asana.com/api/1.0"
+)
+
 // type
 //
 type Asana struct {
-	ApiURL      string
 	BearerToken string
-	IsLive      bool
 }
 
 // Response represents highest level of exactonline api response
@@ -37,36 +39,27 @@ type NextPage struct {
 	URI    string `json:"uri"`
 }
 
-func New(apiURL string, bearerToken string, isLive bool) (*Asana, *errortools.Error) {
+func NewAsana(bearerToken string) (*Asana, *errortools.Error) {
 	i := new(Asana)
 
-	if apiURL == "" {
-		return nil, errortools.ErrorMessage("Asana ApiUrl not provided")
-	}
 	if bearerToken == "" {
 		return nil, errortools.ErrorMessage("Asana Token not provided")
 	}
 
-	i.ApiURL = apiURL
 	i.BearerToken = bearerToken
-	i.IsLive = isLive
-
-	if !strings.HasSuffix(i.ApiURL, "/") {
-		i.ApiURL = i.ApiURL + "/"
-	}
 
 	return i, nil
 }
 
 // generic Get method
 //
-func (a *Asana) Get(url string, responseModel interface{}) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
-	return a.httpRequest(http.MethodGet, url, nil, responseModel)
+func (a *Asana) Get(urlPath string, responseModel interface{}) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
+	return a.httpRequest(http.MethodGet, urlPath, nil, responseModel)
 }
 
-func (a *Asana) httpRequest(httpMethod string, url string, bodyModel interface{}, responseModel interface{}) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
+func (a *Asana) httpRequest(httpMethod string, urlPath string, bodyModel interface{}, responseModel interface{}) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
 	if utilities.IsNil(bodyModel) {
-		return a.httpRequestWithBuffer(httpMethod, url, nil, responseModel)
+		return a.httpRequestWithBuffer(httpMethod, urlPath, nil, responseModel)
 	}
 
 	b, err := json.Marshal(bodyModel)
@@ -74,14 +67,15 @@ func (a *Asana) httpRequest(httpMethod string, url string, bodyModel interface{}
 		return nil, nil, nil, errortools.ErrorMessage(err)
 	}
 
-	return a.httpRequestWithBuffer(httpMethod, url, bytes.NewBuffer(b), responseModel)
+	return a.httpRequestWithBuffer(httpMethod, urlPath, bytes.NewBuffer(b), responseModel)
 }
 
-func (a *Asana) httpRequestWithBuffer(httpMethod string, url string, body io.Reader, responseModel interface{}) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
+func (a *Asana) httpRequestWithBuffer(httpMethod string, urlPath string, body io.Reader, responseModel interface{}) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
 	client := &http.Client{}
 
 	e := new(errortools.Error)
 
+	url := fmt.Sprintf("%s/%s", APIURL, urlPath)
 	request, err := http.NewRequest(httpMethod, url, body)
 	e.SetRequest(request)
 	if err != nil {
