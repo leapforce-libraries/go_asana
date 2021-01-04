@@ -45,7 +45,7 @@ func (i *Asana) GetTeamsInternal(workspaceID string) ([]Team, *errortools.Error)
 
 		ts := []Team{}
 
-		nextPage, _, e := i.Get(url, &ts)
+		_, _, nextPage, e := i.Get(url, &ts)
 		if e != nil {
 			return nil, e
 		}

@@ -44,7 +44,7 @@ func (i *Asana) GetWorkspacesInternal() ([]Workspace, *errortools.Error) {
 
 		ts := []Workspace{}
 
-		nextPage, _, e := i.Get(url, &ts)
+		_, _, nextPage, e := i.Get(url, &ts)
 		if e != nil {
 			return nil, e
 		}
