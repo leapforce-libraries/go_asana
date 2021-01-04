@@ -38,7 +38,7 @@ func (i *Asana) GetUsersByWorkspaceID(workspaceID string) ([]User, *errortools.E
 // getUsersInternal is the generic function retrieving users from Asana
 //
 func (i *Asana) getUsersInternal(workspaceID string) ([]User, *errortools.Error) {
-	urlStr := "workspaces/%s/users?limit=%s%s&opt_fields=%s"
+	urlStr := "users?workspace=%s&limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
 	//rowCount := limit
