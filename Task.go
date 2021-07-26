@@ -2,14 +2,15 @@ package asana
 
 import (
 	"fmt"
-	"strconv"
+	"net/url"
 	"time"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
+	go_http "github.com/leapforce-libraries/go_http"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
-// Task stores Task from Asana
+// Task stores Task from Service
 //
 type Task struct {
 	ID                    string            `json:"gid"`
@@ -49,9 +50,92 @@ type Task struct {
 	Workspace             CompactObject     `json:"workspace"`
 }
 
+type GetTasksConfig struct {
+	ProjectID     *string
+	ModifiedSince *time.Time
+}
+
+// GetTasks returns all tasks
+//
+func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Error) {
+	tasks := []Task{}
+
+	params := url.Values{}
+	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
+	params.Set("limit", fmt.Sprintf("%v", limitDefault))
+	if config.ProjectID != nil {
+		params.Set("project", *config.ProjectID)
+	}
+	if config.ModifiedSince != nil {
+		params.Set("modified_since", config.ModifiedSince.Format("2006-01-02T15:04:05"))
+	}
+
+	for {
+		_tasks := []Task{}
+
+		requestConfig := go_http.RequestConfig{
+			URL:           service.url(fmt.Sprintf("tasks?%s", params.Encode())),
+			ResponseModel: &tasks,
+		}
+		_, _, nextPage, e := service.get(&requestConfig)
+		if e != nil {
+			return nil, e
+		}
+
+		tasks = append(tasks, _tasks...)
+
+		if nextPage == nil {
+			break
+		}
+		if nextPage.Offset == "" {
+			break
+		}
+
+		params.Set("offset", nextPage.Offset)
+	}
+
+	return tasks, nil
+}
+
+// GetSubTasks returns all subtasks of a parent task
+//
+func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
+	tasks := []Task{}
+
+	params := url.Values{}
+	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
+
+	for {
+		_tasks := []Task{}
+
+		requestConfig := go_http.RequestConfig{
+			URL:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
+			ResponseModel: &tasks,
+		}
+		_, _, nextPage, e := service.get(&requestConfig)
+		if e != nil {
+			return nil, e
+		}
+
+		tasks = append(tasks, _tasks...)
+
+		if nextPage == nil {
+			break
+		}
+		if nextPage.Offset == "" {
+			break
+		}
+
+		params.Set("offset", nextPage.Offset)
+	}
+
+	return tasks, nil
+}
+
+/*
 // GetTasksByProjectID returns all tasks for a specific project
 //
-func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, *errortools.Error) {
+func (service *Service) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, *errortools.Error) {
 	urlStr := "tasks?project=%s&limit=%s%s&opt_fields=%s%s"
 	limit := 100
 	offset := ""
@@ -69,10 +153,10 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 			_modifiedSince = fmt.Sprintf("&modified_since=%s", modifiedSince.Format("2006-01-02T15:04:05"))
 		}
 
-		urlPath := fmt.Sprintf(urlStr, projectID, strconv.Itoa(limit), offset, utilities.GetTaggedTagNames("json", Task{}), _modifiedSince)
+		urlPath := fmt.Sprintf(urlStr, projectID, strconv.Itoa(limit), offset, utilities.GetTaskgedTaskNames("json", Task{}), _modifiedSince)
 		//fmt.Println(url)
 
-		nextPage, e := i.getTasksInternal(urlPath, &tasks, projectIDsDone, false)
+		nextPage, e := service.getTasksInternal(urlPath, &tasks, projectIDsDone, false)
 		if e != nil {
 			return nil, e
 		}
@@ -90,12 +174,14 @@ func (i *Asana) GetTasksByProjectID(projectID string, projectIDsDone *[]string, 
 	return tasks, nil
 }
 
-func (i *Asana) getTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, *errortools.Error) {
-	urlSubStr := "tasks/%s/subtasks?opt_fields=%s"
-
+func (service *Service) getTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, *errortools.Error) {
 	ts := []Task{}
 
-	_, _, nextPage, e := i.Get(url, &ts)
+	requestConfig := go_http.RequestConfig{
+		URL:           url,
+		ResponseModel: &ts,
+	}
+	_, _, nextPage, e := service.Get(&requestConfig)
 	if e != nil {
 		return nil, e
 	}
@@ -133,8 +219,8 @@ func (i *Asana) getTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 			*tasks = append(*tasks, t)
 
 			if t.NumSubtasks > 0 {
-				urlSub := fmt.Sprintf(urlSubStr, t.ID, utilities.GetTaggedTagNames("json", Task{}))
-				_, e := i.getTasksInternal(urlSub, tasks, projectIDsDone, true)
+				urlSub := fmt.Sprintf(urlSubStr, t.ID, utilities.GetTaskgedTaskNames("json", Task{}))
+				_, e := service.getTasksInternal(urlSub, tasks, projectIDsDone, true)
 				if e != nil {
 					return nil, e
 				}
@@ -144,3 +230,4 @@ func (i *Asana) getTasksInternal(url string, tasks *[]Task, projectIDsDone *[]st
 
 	return nextPage, nil
 }
+*/

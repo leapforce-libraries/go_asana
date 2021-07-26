@@ -2,13 +2,14 @@ package asana
 
 import (
 	"fmt"
-	"strconv"
+	"net/url"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
+	go_http "github.com/leapforce-libraries/go_http"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
-// User stores User from Asana
+// User stores User from Service
 //
 type User struct {
 	ID           string          `json:"gid"`
@@ -19,7 +20,7 @@ type User struct {
 	Workspaces   []CompactObject `json:"workspaces"`
 }
 
-// Photo stores Photo from Asana
+// Photo stores Photo from Service
 //
 type Photo struct {
 	Image128x128 string `json:"image_128x128"`
@@ -29,15 +30,63 @@ type Photo struct {
 	Image60x60   string `json:"image_60x60"`
 }
 
-// GetUsersByWorkspaceID returns all users for a specific workspace
-//
-func (i *Asana) GetUsersByWorkspaceID(workspaceID string) ([]User, *errortools.Error) {
-	return i.getUsersInternal(workspaceID)
+type GetUsersConfig struct {
+	WorkspaceID *string
+	TeamID      *string
 }
 
-// getUsersInternal is the generic function retrieving users from Asana
+// GetUsers returns all users
 //
-func (i *Asana) getUsersInternal(workspaceID string) ([]User, *errortools.Error) {
+func (service *Service) GetUsers(config *GetUsersConfig) ([]User, *errortools.Error) {
+	users := []User{}
+
+	params := url.Values{}
+	params.Set("opt_fields", utilities.GetTaggedTagNames("json", User{}))
+	params.Set("limit", fmt.Sprintf("%v", limitDefault))
+	if config.WorkspaceID != nil {
+		params.Set("workspace", *config.WorkspaceID)
+	}
+	if config.TeamID != nil {
+		params.Set("team", *config.TeamID)
+	}
+
+	for {
+		_users := []User{}
+
+		requestConfig := go_http.RequestConfig{
+			URL:           service.url(fmt.Sprintf("users?%s", params.Encode())),
+			ResponseModel: &_users,
+		}
+		_, _, nextPage, e := service.get(&requestConfig)
+		if e != nil {
+			return nil, e
+		}
+
+		users = append(users, _users...)
+
+		if nextPage == nil {
+			break
+		}
+		if nextPage.Offset == "" {
+			break
+		}
+
+		params.Set("offset", nextPage.Offset)
+	}
+
+	return users, nil
+}
+
+/*
+// GetUsersByWorkspaceID returns all users for a specific workspace
+//
+func (service *Service) GetUsersByWorkspaceID(workspaceID string) ([]User, *errortools.Error) {
+	return service.getUsersInternal(workspaceID)
+}
+
+// getUsersInternal is the generic function retrieving users from Service
+//
+func (service *Service) getUsersInternal(workspaceID string) ([]User, *errortools.Error) {
 	urlStr := "users?workspace=%s&limit=%s%s&opt_fields=%s"
 	limit := 100
 	offset := ""
@@ -55,7 +104,7 @@ func (i *Asana) getUsersInternal(workspaceID string) ([]User, *errortools.Error)
 
 		ts := []User{}
 
-		_, _, nextPage, e := i.Get(urlPath, &ts)
+		_, _, nextPage, e := service.Get(urlPath, &ts)
 		if e != nil {
 			return nil, e
 		}
@@ -77,34 +126,4 @@ func (i *Asana) getUsersInternal(workspaceID string) ([]User, *errortools.Error)
 
 	return users, nil
 }
-
-// GetUsers returns all users
-//
-/*
-func (i *Asana) GetUsers() ([]User, error) {
-	urlStr := "%susers?opt_fields=%s"
-
-	users := []User{}
-
-	url := fmt.Sprintf(urlStr, i.ApiURL, GetJSONTaggedFieldNames(User{}))
-	//fmt.Println(url)
-
-	_, response, err := i.Get(url, &users)
-	if err != nil {
-		return nil, err
-	}
-
-	if response != nil {
-		if response.Errors != nil {
-			for _, e := range *response.Errors {
-				message := fmt.Sprintf("Error in %v: %v", url, e.Message)
-				if i.IsLive {
-					sentry.CaptureMessage(message)
-				}
-				fmt.Println(message)
-			}
-		}
-	}
-
-	return users, nil
-}*/
+*/

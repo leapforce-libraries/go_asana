@@ -2,12 +2,14 @@ package asana
 
 import (
 	"fmt"
+	"net/url"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
+	go_http "github.com/leapforce-libraries/go_http"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
-// Project stores Project from Asana
+// Project stores Project from Service
 //
 type Project struct {
 	ID            string        `json:"gid"`
@@ -36,19 +38,47 @@ type Project struct {
 	Team         CompactObject        `json:"team"`
 }
 
+type GetProjectsConfig struct {
+	WorkspaceID *string
+}
+
 // GetProjects returns all projects
 //
-func (i *Asana) GetProjects() ([]Project, *errortools.Error) {
-	urlStr := "projects?opt_fields=%s"
-
+func (service *Service) GetProjects(config *GetProjectsConfig) ([]Project, *errortools.Error) {
 	projects := []Project{}
 
-	urlPath := fmt.Sprintf(urlStr, utilities.GetTaggedTagNames("json", Project{}))
-	//fmt.Println(url)
+	params := url.Values{}
+	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Project{}))
 
-	_, _, _, e := i.Get(urlPath, &projects)
-	if e != nil {
-		return nil, e
+	if config != nil {
+		if config.WorkspaceID != nil {
+			params.Set("workspace", *config.WorkspaceID)
+			params.Set("limit", fmt.Sprintf("%v", limitDefault)) // pagination only if workspace is specified
+		}
+	}
+
+	for {
+		_projects := []Project{}
+
+		requestConfig := go_http.RequestConfig{
+			URL:           service.url(fmt.Sprintf("projects?%s", params.Encode())),
+			ResponseModel: &projects,
+		}
+		_, _, nextPage, e := service.get(&requestConfig)
+		if e != nil {
+			return nil, e
+		}
+
+		projects = append(projects, _projects...)
+
+		if nextPage == nil {
+			break
+		}
+		if nextPage.Offset == "" {
+			break
+		}
+
+		params.Set("offset", nextPage.Offset)
 	}
 
 	return projects, nil
