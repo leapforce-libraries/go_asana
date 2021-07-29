@@ -34,9 +34,9 @@ func (service *Service) GetTagsByWorkspace(workspaceID string) ([]Tag, *errortoo
 
 		requestConfig := go_http.RequestConfig{
 			URL:           service.url(fmt.Sprintf("workspaces/%s/tags?%s", workspaceID, params.Encode())),
-			ResponseModel: &tags,
+			ResponseModel: &_tags,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}

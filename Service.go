@@ -8,12 +8,14 @@ import (
 
 	errortools "github.com/leapforce-libraries/go_errortools"
 	go_http "github.com/leapforce-libraries/go_http"
+	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
 const (
-	apiName      string = "Asana"
-	apiURL       string = "https://app.asana.com/api/1.0"
-	limitDefault uint64 = 100
+	apiName        string = "Asana"
+	apiURL         string = "https://app.asana.com/api/1.0"
+	limitDefault   uint64 = 100
+	DateTimeLayout string = "2006-01-02T15:04:05.000Z"
 )
 
 // type
@@ -68,9 +70,11 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 	header.Set("Authorization", fmt.Sprintf("Bearer %s", service.bearerToken))
 	(*requestConfig).NonDefaultHeaders = &header
 
-	// add error model
 	errorResponse := ErrorResponse{}
-	(*requestConfig).ErrorModel = &errorResponse
+	if utilities.IsNil(requestConfig.ErrorModel) {
+		// add error model
+		(*requestConfig).ErrorModel = &errorResponse
+	}
 
 	request, response, e := service.httpService.HTTPRequest(httpMethod, requestConfig)
 	if len(errorResponse.Errors) > 0 {
@@ -88,7 +92,7 @@ func (service *Service) url(path string) string {
 	return fmt.Sprintf("%s/%s", apiURL, path)
 }
 
-func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
+func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
 	_response := Response{}
 
 	_requestConfig := go_http.RequestConfig{
@@ -112,6 +116,10 @@ func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request
 	}
 
 	return request, response, _response.NextPage, e
+}
+
+func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+	return service.httpRequest(http.MethodGet, requestConfig)
 }
 
 func (service *Service) APIName() string {

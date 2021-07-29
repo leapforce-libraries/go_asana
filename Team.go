@@ -34,9 +34,9 @@ func (service *Service) GetTeamsByWorkspace(workspaceID string) ([]Team, *errort
 
 		requestConfig := go_http.RequestConfig{
 			URL:           service.url(fmt.Sprintf("organizations/%s/teams?%s", workspaceID, params.Encode())),
-			ResponseModel: &teams,
+			ResponseModel: &_teams,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}

@@ -33,9 +33,9 @@ func (service *Service) GetWorkspaces() ([]Workspace, *errortools.Error) {
 
 		requestConfig := go_http.RequestConfig{
 			URL:           service.url(fmt.Sprintf("workspaces?%s", params.Encode())),
-			ResponseModel: &workspaces,
+			ResponseModel: &_workspaces,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}

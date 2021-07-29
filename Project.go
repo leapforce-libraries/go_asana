@@ -62,9 +62,9 @@ func (service *Service) GetProjects(config *GetProjectsConfig) ([]Project, *erro
 
 		requestConfig := go_http.RequestConfig{
 			URL:           service.url(fmt.Sprintf("projects?%s", params.Encode())),
-			ResponseModel: &projects,
+			ResponseModel: &_projects,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}

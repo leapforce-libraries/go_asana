@@ -75,44 +75,9 @@ func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Er
 
 		requestConfig := go_http.RequestConfig{
 			URL:           service.url(fmt.Sprintf("tasks?%s", params.Encode())),
-			ResponseModel: &tasks,
+			ResponseModel: &_tasks,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
-		if e != nil {
-			return nil, e
-		}
-
-		tasks = append(tasks, _tasks...)
-
-		if nextPage == nil {
-			break
-		}
-		if nextPage.Offset == "" {
-			break
-		}
-
-		params.Set("offset", nextPage.Offset)
-	}
-
-	return tasks, nil
-}
-
-// GetSubTasks returns all subtasks of a parent task
-//
-func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
-	tasks := []Task{}
-
-	params := url.Values{}
-	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
-
-	for {
-		_tasks := []Task{}
-
-		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
-			ResponseModel: &tasks,
-		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}
@@ -133,101 +98,112 @@ func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
 }
 
 /*
-// GetTasksByProjectID returns all tasks for a specific project
+// GetSubTasks returns all subtasks of a parent task
 //
-func (service *Service) GetTasksByProjectID(projectID string, projectIDsDone *[]string, modifiedSince *time.Time) ([]Task, *errortools.Error) {
-	urlStr := "tasks?project=%s&limit=%s%s&opt_fields=%s%s"
-	limit := 100
-	offset := ""
-	//rowCount := limit
-	batch := 0
-
+func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
 	tasks := []Task{}
 
-	for batch == 0 || offset != "" {
-		batch++
-		//fmt.Printf("Batch %v for ProjectID %v\n", batch, projectID)
+	params := url.Values{}
+	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
 
-		_modifiedSince := ""
-		if modifiedSince != nil {
-			_modifiedSince = fmt.Sprintf("&modified_since=%s", modifiedSince.Format("2006-01-02T15:04:05"))
+	for {
+		_tasks := []Task{}
+
+		requestConfig := go_http.RequestConfig{
+			URL:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
+			ResponseModel: &_tasks,
 		}
-
-		urlPath := fmt.Sprintf(urlStr, projectID, strconv.Itoa(limit), offset, utilities.GetTaskgedTaskNames("json", Task{}), _modifiedSince)
-		//fmt.Println(url)
-
-		nextPage, e := service.getTasksInternal(urlPath, &tasks, projectIDsDone, false)
+		_, _, nextPage, e := service.get(&requestConfig)
 		if e != nil {
 			return nil, e
 		}
 
-		offset = ""
-		if nextPage != nil {
-			offset = fmt.Sprintf("&offset=%s", nextPage.Offset)
+		tasks = append(tasks, _tasks...)
+
+		if nextPage == nil {
+			break
 		}
+		if nextPage.Offset == "" {
+			break
+		}
+
+		params.Set("offset", nextPage.Offset)
 	}
 
-	if len(tasks) == 0 {
-		tasks = nil
+	return tasks, nil
+}*/
+
+/*
+type SortByField string
+
+const (
+	SortByFieldDueDate     SortByField = "due_date"
+	SortByFieldCreatedAt   SortByField = "created_at"
+	SortByFieldCompletedAt SortByField = "completed_at"
+	SortByFieldLikes       SortByField = "likes"
+	SortByFieldModifiedAt  SortByField = "modified_at"
+)*/
+
+type SearchTasksConfig struct {
+	WorkspaceID      string
+	CreatedAtBefore  *time.Time
+	CreatedAtAfter   *time.Time
+	ModifiedAtBefore *time.Time
+	ModifiedAtAfter  *time.Time
+	//SortByField      *SortByField
+	//SortAscending    *bool
+}
+
+// GetTasks returns all tasks
+//
+func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errortools.Error) {
+	tasks := []Task{}
+
+	params := url.Values{}
+	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
+	params.Set("limit", fmt.Sprintf("%v", limitDefault))
+	params.Set("sort_by", "created_at")
+	params.Set("sort_ascending", "true")
+	if config.CreatedAtBefore != nil {
+		params.Set("created_at.before", config.CreatedAtBefore.Format(DateTimeLayout))
+	}
+	if config.CreatedAtAfter != nil {
+		params.Set("created_at.after", config.CreatedAtAfter.Format(DateTimeLayout))
+	}
+	if config.ModifiedAtBefore != nil {
+		params.Set("modified_at.before", config.ModifiedAtBefore.Format(DateTimeLayout))
+	}
+	if config.ModifiedAtAfter != nil {
+		params.Set("modified_at.after", config.ModifiedAtAfter.Format(DateTimeLayout))
+	}
+
+	for {
+		_tasks := []Task{}
+
+		requestConfig := go_http.RequestConfig{
+			URL:           service.url(fmt.Sprintf("workspaces/%s/tasks/search?%s", config.WorkspaceID, params.Encode())),
+			ResponseModel: &_tasks,
+		}
+		_, _, _, e := service.getData(&requestConfig)
+		if e != nil {
+			return nil, e
+		}
+
+		tasks = append(tasks, _tasks...)
+
+		if len(_tasks) == 0 {
+			break
+		}
+
+		lastTask := _tasks[len(_tasks)-1]
+		maxCreatedAt, err := time.Parse(DateTimeLayout, lastTask.CreatedAt)
+		if err != nil {
+			return nil, errortools.ErrorMessage(err)
+		}
+
+		// assumption: no tasks with same CreatedAt at millisecond level
+		params.Set("created_at.after", maxCreatedAt.Add(time.Millisecond).Format(DateTimeLayout))
 	}
 
 	return tasks, nil
 }
-
-func (service *Service) getTasksInternal(url string, tasks *[]Task, projectIDsDone *[]string, subtasks bool) (*NextPage, *errortools.Error) {
-	ts := []Task{}
-
-	requestConfig := go_http.RequestConfig{
-		URL:           url,
-		ResponseModel: &ts,
-	}
-	_, _, nextPage, e := service.Get(&requestConfig)
-	if e != nil {
-		return nil, e
-	}
-
-	if tasks != nil {
-		for _, t := range ts {
-			taskFound := false
-
-			if projectIDsDone != nil {
-				if len(*projectIDsDone) > 0 {
-				out:
-					for _, proj := range t.Projects {
-						for _, pid := range *projectIDsDone {
-							if proj.ID == pid {
-								taskFound = true
-								break out
-							}
-						}
-					}
-
-					if taskFound {
-						fmt.Println("duplicate TaskID: ", t.ID)
-						continue
-					}
-				}
-			}
-
-			if !subtasks {
-				if t.Parent.ResourceType != "project" && t.Parent.ResourceType != "" {
-					fmt.Println("invalid Parent.ResourceType: ", t.Parent.ResourceType)
-					continue
-				}
-			}
-
-			*tasks = append(*tasks, t)
-
-			if t.NumSubtasks > 0 {
-				urlSub := fmt.Sprintf(urlSubStr, t.ID, utilities.GetTaskgedTaskNames("json", Task{}))
-				_, e := service.getTasksInternal(urlSub, tasks, projectIDsDone, true)
-				if e != nil {
-					return nil, e
-				}
-			}
-		}
-	}
-
-	return nextPage, nil
-}
-*/

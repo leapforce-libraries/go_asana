@@ -57,7 +57,7 @@ func (service *Service) GetUsers(config *GetUsersConfig) ([]User, *errortools.Er
 			URL:           service.url(fmt.Sprintf("users?%s", params.Encode())),
 			ResponseModel: &_users,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}
