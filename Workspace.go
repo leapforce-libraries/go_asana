@@ -13,8 +13,8 @@ import (
 //
 type Workspace struct {
 	ID             string   `json:"gid"`
-	Name           string   `json:"name"`
 	ResourceType   string   `json:"resource_type"`
+	Name           string   `json:"name"`
 	EmailDomains   []string `json:"email_domains"`
 	IsOrganization bool     `json:"is_organization"`
 }

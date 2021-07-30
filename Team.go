@@ -12,12 +12,13 @@ import (
 // Team stores Team from Service
 //
 type Team struct {
-	ID              string        `json:"gid"`
-	Name            string        `json:"name"`
-	ResourceType    string        `json:"resource_type"`
-	Description     string        `json:"description"`
-	HTMLDescription string        `json:"html_description"`
-	Organization    CompactObject `json:"organization"`
+	ID              string `json:"gid"`
+	ResourceType    string `json:"resource_type"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
+	HTMLDescription string `json:"html_description"`
+	Organization    Object `json:"organization"`
+	PermalinkURL    string `json:"permalink_url"`
 }
 
 // GetTeams returns all teams

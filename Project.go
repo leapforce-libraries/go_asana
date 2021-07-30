@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	a_types "github.com/leapforce-libraries/go_asana/types"
 	errortools "github.com/leapforce-libraries/go_errortools"
 	go_http "github.com/leapforce-libraries/go_http"
 	utilities "github.com/leapforce-libraries/go_utilities"
@@ -12,30 +13,30 @@ import (
 // Project stores Project from Service
 //
 type Project struct {
-	ID            string        `json:"gid"`
-	Name          string        `json:"name"`
-	ResourceType  string        `json:"resource_type"`
-	Archived      bool          `json:"archived"`
-	Color         string        `json:"color"`
-	CreatedAt     string        `json:"created_at"`
-	CurrentStatus ProjectStatus `json:"current_status"`
-	//CustomFieldSettings string `json:"custom_field_settings"`
-	DefaultView  string               `json:"default_view"`
-	DueDate      string               `json:"due_date"`
-	DueOn        string               `json:"due_on"`
-	HTMLNotes    string               `json:"html_notes"`
-	IsTemplate   bool                 `json:"is_template"`
-	Members      []CompactObject      `json:"members"`
-	ModifiedAt   string               `json:"modified_at"`
-	Notes        string               `json:"notes"`
-	Public       bool                 `json:"public"`
-	StartOn      string               `json:"start_on"`
-	Workspace    CompactObject        `json:"workspace"`
-	CustomFields []CustomFieldProject `json:"custom_fields"`
-	Followers    []CompactObject      `json:"followers"`
-	Icon         string               `json:"icon"`
-	Owner        CompactObject        `json:"owner"`
-	Team         CompactObject        `json:"team"`
+	ID                  string                 `json:"gid"`
+	Name                string                 `json:"name"`
+	ResourceType        string                 `json:"resource_type"`
+	Archived            bool                   `json:"archived"`
+	Color               *string                `json:"color"`
+	CreatedAt           a_types.DateTimeString `json:"created_at"`
+	CurrentStatus       ProjectStatus          `json:"current_status"`
+	CustomFieldSettings []ObjectCompact        `json:"custom_field_settings"`
+	DefaultView         string                 `json:"default_view"`
+	DueOn               *a_types.DateString    `json:"due_on"`
+	HTMLNotes           string                 `json:"html_notes"`
+	IsTemplate          bool                   `json:"is_template"`
+	Members             []Object               `json:"members"`
+	ModifiedAt          a_types.DateTimeString `json:"modified_at"`
+	Notes               string                 `json:"notes"`
+	Public              bool                   `json:"public"`
+	StartOn             *a_types.DateString    `json:"start_on"`
+	Workspace           Object                 `json:"workspace"`
+	CustomFields        []CustomFieldProject   `json:"custom_fields"`
+	Followers           []Object               `json:"followers"`
+	Icon                *string                `json:"icon"`
+	Owner               Object                 `json:"owner"`
+	PermalinkURL        string                 `json:"permalink_url"`
+	Team                Object                 `json:"team"`
 }
 
 type GetProjectsConfig struct {

@@ -12,12 +12,13 @@ import (
 // Tag stores Tag from Service
 //
 type Tag struct {
-	ID           string          `json:"gid"`
-	Name         string          `json:"name"`
-	ResourceType string          `json:"resource_type"`
-	Color        string          `json:"color"`
-	Followers    []CompactObject `json:"followers"`
-	Workspace    CompactObject   `json:"workspace"`
+	ID           string   `json:"gid"`
+	ResourceType string   `json:"resource_type"`
+	Color        string   `json:"color"`
+	Followers    []Object `json:"followers"`
+	Name         string   `json:"name"`
+	PermalinkURL string   `json:"permalink_url"`
+	Workspace    Object   `json:"workspace"`
 }
 
 // GetTags returns all tags

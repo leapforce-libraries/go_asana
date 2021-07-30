@@ -12,12 +12,12 @@ import (
 // User stores User from Service
 //
 type User struct {
-	ID           string          `json:"gid"`
-	Name         string          `json:"name"`
-	ResourceType string          `json:"resource_type"`
-	Email        string          `json:"email"`
-	Photo        Photo           `json:"photo"`
-	Workspaces   []CompactObject `json:"workspaces"`
+	ID           string   `json:"gid"`
+	ResourceType string   `json:"resource_type"`
+	Name         string   `json:"name"`
+	Email        string   `json:"email"`
+	Photo        *Photo   `json:"photo"`
+	Workspaces   []Object `json:"workspaces"`
 }
 
 // Photo stores Photo from Service

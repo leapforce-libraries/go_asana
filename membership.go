@@ -3,6 +3,6 @@ package asana
 // Membership stores Membership from Asana
 //
 type Membership struct {
-	Project CompactObject `json:"project"`
-	Section CompactObject `json:"section"`
+	Project Object `json:"project"`
+	Section Object `json:"section"`
 }

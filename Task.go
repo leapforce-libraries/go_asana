@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 
+	a_types "github.com/leapforce-libraries/go_asana/types"
 	errortools "github.com/leapforce-libraries/go_errortools"
 	go_http "github.com/leapforce-libraries/go_http"
 	utilities "github.com/leapforce-libraries/go_utilities"
@@ -13,41 +14,39 @@ import (
 // Task stores Task from Service
 //
 type Task struct {
-	ID                    string            `json:"gid"`
-	Name                  string            `json:"name"`
-	ResourceType          string            `json:"resource_type"`
-	ApprovalStatus        string            `json:"approval_status"`
-	AssigneeStatus        string            `json:"assignee_status"`
-	Completed             bool              `json:"completed"`
-	CompletedAt           string            `json:"completed_at"`
-	CompletedBy           CompactObject     `json:"completed_by"`
-	CreatedAt             string            `json:"created_at"`
-	Dependencies          []CompactObject   `json:"dependencies"`
-	Dependents            []CompactObject   `json:"dependents"`
-	DueAt                 string            `json:"due_at"`
-	DueOn                 string            `json:"due_on"`
-	External              External          `json:"external"`
-	Hearted               bool              `json:"hearted"`
-	Hearts                []UserList        `json:"hearts"`
-	HTMLNotes             string            `json:"html_notes"`
-	IsRenderedAsSeparator bool              `json:"is_rendered_as_separator"`
-	Liked                 bool              `json:"liked"`
-	Likes                 []UserList        `json:"likes"`
-	Memberships           []Membership      `json:"memberships"`
-	ModifiedAt            string            `json:"modified_at"`
-	Notes                 string            `json:"notes"`
-	NumHearts             int               `json:"num_hearts"`
-	NumLikes              int               `json:"num_likes"`
-	NumSubtasks           int               `json:"num_subtasks"`
-	ResourceSubtype       string            `json:"resource_subtype"`
-	StartOn               string            `json:"start_on"`
-	Assignee              CompactObject     `json:"assignee"`
-	CustomFields          []CustomFieldTask `json:"custom_fields"`
-	Followers             []CompactObject   `json:"followers"`
-	Parent                CompactObject     `json:"parent"`
-	Projects              []CompactObject   `json:"projects"`
-	Tags                  []CompactObject   `json:"tags"`
-	Workspace             CompactObject     `json:"workspace"`
+	ID                    string                  `json:"gid"`
+	ResourceType          string                  `json:"resource_type"`
+	Name                  string                  `json:"name"`
+	ApprovalStatus        string                  `json:"approval_status"`
+	AssigneeStatus        string                  `json:"assignee_status"`
+	Completed             bool                    `json:"completed"`
+	CompletedAt           string                  `json:"completed_at"`
+	CompletedBy           Object                  `json:"completed_by"`
+	CreatedAt             a_types.DateTimeString  `json:"created_at"`
+	Dependencies          []ObjectCompact         `json:"dependencies"`
+	Dependents            []ObjectCompact         `json:"dependents"`
+	DueAt                 *a_types.DateTimeString `json:"due_at"`
+	DueOn                 *a_types.DateString     `json:"due_on"`
+	External              External                `json:"external"`
+	HTMLNotes             string                  `json:"html_notes"`
+	IsRenderedAsSeparator bool                    `json:"is_rendered_as_separator"`
+	Liked                 bool                    `json:"liked"`
+	Likes                 []UserList              `json:"likes"`
+	Memberships           []Membership            `json:"memberships"`
+	ModifiedAt            a_types.DateTimeString  `json:"modified_at"`
+	Notes                 string                  `json:"notes"`
+	NumLikes              int64                   `json:"num_likes"`
+	NumSubtasks           int64                   `json:"num_subtasks"`
+	ResourceSubtype       string                  `json:"resource_subtype"`
+	StartOn               *a_types.DateString     `json:"start_on"`
+	Assignee              Object                  `json:"assignee"`
+	CustomFields          []CustomFieldTask       `json:"custom_fields"`
+	Followers             []Object                `json:"followers"`
+	Parent                *Object                 `json:"parent"`
+	PermalinkURL          string                  `json:"permalink_url"`
+	Projects              []Object                `json:"projects"`
+	Tags                  []Object                `json:"tags"`
+	Workspace             Object                  `json:"workspace"`
 }
 
 type GetTasksConfig struct {
@@ -196,13 +195,9 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 		}
 
 		lastTask := _tasks[len(_tasks)-1]
-		maxCreatedAt, err := time.Parse(DateTimeLayout, lastTask.CreatedAt)
-		if err != nil {
-			return nil, errortools.ErrorMessage(err)
-		}
 
 		// assumption: no tasks with same CreatedAt at millisecond level
-		params.Set("created_at.after", maxCreatedAt.Add(time.Millisecond).Format(DateTimeLayout))
+		params.Set("created_at.after", lastTask.CreatedAt.Value().Add(time.Millisecond).Format(DateTimeLayout))
 	}
 
 	return tasks, nil
