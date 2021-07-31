@@ -96,7 +96,6 @@ func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Er
 	return tasks, nil
 }
 
-/*
 // GetSubTasks returns all subtasks of a parent task
 //
 func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
@@ -112,7 +111,7 @@ func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
 			URL:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
 			ResponseModel: &_tasks,
 		}
-		_, _, nextPage, e := service.get(&requestConfig)
+		_, _, nextPage, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
 		}
@@ -130,7 +129,7 @@ func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
 	}
 
 	return tasks, nil
-}*/
+}
 
 /*
 type SortByField string
