@@ -54,12 +54,13 @@ func (service *Service) GetEventsByProject(projectID string, syncToken *string) 
 	}
 
 	requestConfig := go_http.RequestConfig{
+		Method:        http.MethodGet,
 		URL:           service.url(fmt.Sprintf("events?%s", params.Encode())),
 		ResponseModel: &eventsResponse,
 		ErrorModel:    &eventsErrorResponse,
 	}
 	//fmt.Println(requestConfig.URL)
-	_, response, e := service.get(&requestConfig)
+	_, response, e := service.httpRequest(&requestConfig)
 	sync := eventsResponse.Sync
 	if sync == nil {
 		sync = eventsErrorResponse.Sync

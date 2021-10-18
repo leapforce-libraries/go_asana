@@ -2,6 +2,7 @@ package asana
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -206,9 +207,10 @@ type DeleteTaskConfig struct {
 
 func (service *Service) DeleteTask(config *DeleteTaskConfig) *errortools.Error {
 	requestConfig := go_http.RequestConfig{
-		URL: service.url(fmt.Sprintf("tasks/%s", config.TaskID)),
+		Method: http.MethodDelete,
+		URL:    service.url(fmt.Sprintf("tasks/%s", config.TaskID)),
 	}
-	_, _, e := service.delete(&requestConfig)
+	_, _, e := service.httpRequest(&requestConfig)
 	if e != nil {
 		return e
 	}

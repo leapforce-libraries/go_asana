@@ -64,7 +64,7 @@ func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
 	}, nil
 }
 
-func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	// add authentication header
 	header := http.Header{}
 	header.Set("Authorization", fmt.Sprintf("Bearer %s", service.bearerToken))
@@ -76,7 +76,7 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 		(*requestConfig).ErrorModel = &errorResponse
 	}
 
-	request, response, e := service.httpService.HTTPRequest(httpMethod, requestConfig)
+	request, response, e := service.httpService.HTTPRequest(requestConfig)
 	if len(errorResponse.Errors) > 0 {
 		messages := []string{}
 		for _, message := range errorResponse.Errors {
@@ -96,11 +96,12 @@ func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Req
 	_response := Response{}
 
 	_requestConfig := go_http.RequestConfig{
+		Method:        http.MethodGet,
 		URL:           requestConfig.URL,
 		ResponseModel: &_response,
 	}
 
-	request, response, e := service.httpRequest(http.MethodGet, &_requestConfig)
+	request, response, e := service.httpRequest(&_requestConfig)
 	if e != nil {
 		return request, response, nil, e
 	}
@@ -116,14 +117,6 @@ func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Req
 	}
 
 	return request, response, _response.NextPage, e
-}
-
-func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
-	return service.httpRequest(http.MethodGet, requestConfig)
-}
-
-func (service *Service) delete(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
-	return service.httpRequest(http.MethodDelete, requestConfig)
 }
 
 func (service *Service) APIName() string {
