@@ -122,6 +122,10 @@ func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request
 	return service.httpRequest(http.MethodGet, requestConfig)
 }
 
+func (service *Service) delete(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+	return service.httpRequest(http.MethodDelete, requestConfig)
+}
+
 func (service *Service) APIName() string {
 	return apiName
 }

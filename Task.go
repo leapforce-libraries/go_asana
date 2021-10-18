@@ -152,8 +152,6 @@ type SearchTasksConfig struct {
 	//SortAscending    *bool
 }
 
-// GetTasks returns all tasks
-//
 func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errortools.Error) {
 	tasks := []Task{}
 
@@ -200,4 +198,20 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 	}
 
 	return tasks, nil
+}
+
+type DeleteTaskConfig struct {
+	TaskID string
+}
+
+func (service *Service) DeleteTask(config *DeleteTaskConfig) *errortools.Error {
+	requestConfig := go_http.RequestConfig{
+		URL: service.url(fmt.Sprintf("tasks/%s", config.TaskID)),
+	}
+	_, _, e := service.delete(&requestConfig)
+	if e != nil {
+		return e
+	}
+
+	return nil
 }
