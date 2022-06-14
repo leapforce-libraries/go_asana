@@ -13,7 +13,7 @@ import (
 
 const (
 	apiName        string = "Asana"
-	apiURL         string = "https://app.asana.com/api/1.0"
+	apiUrl         string = "https://app.asana.com/api/1.0"
 	limitDefault   uint64 = 100
 	DateTimeLayout string = "2006-01-02T15:04:05.000Z"
 )
@@ -76,7 +76,7 @@ func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http
 		(*requestConfig).ErrorModel = &errorResponse
 	}
 
-	request, response, e := service.httpService.HTTPRequest(requestConfig)
+	request, response, e := service.httpService.HttpRequest(requestConfig)
 	if len(errorResponse.Errors) > 0 {
 		messages := []string{}
 		for _, message := range errorResponse.Errors {
@@ -89,7 +89,7 @@ func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http
 }
 
 func (service *Service) url(path string) string {
-	return fmt.Sprintf("%s/%s", apiURL, path)
+	return fmt.Sprintf("%s/%s", apiUrl, path)
 }
 
 func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *NextPage, *errortools.Error) {
@@ -97,7 +97,7 @@ func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Req
 
 	_requestConfig := go_http.RequestConfig{
 		Method:        http.MethodGet,
-		URL:           requestConfig.URL,
+		Url:           requestConfig.Url,
 		ResponseModel: &_response,
 	}
 
@@ -119,18 +119,18 @@ func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Req
 	return request, response, _response.NextPage, e
 }
 
-func (service *Service) APIName() string {
+func (service *Service) ApiName() string {
 	return apiName
 }
 
-func (service *Service) APIKey() string {
+func (service *Service) ApiKey() string {
 	return service.bearerToken
 }
 
-func (service *Service) APICallCount() int64 {
+func (service *Service) ApiCallCount() int64 {
 	return service.httpService.RequestCount()
 }
 
-func (service *Service) APIReset() {
+func (service *Service) ApiReset() {
 	service.httpService.ResetRequestCount()
 }

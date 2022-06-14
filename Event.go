@@ -55,30 +55,15 @@ func (service *Service) GetEventsByProject(projectID string, syncToken *string) 
 
 	requestConfig := go_http.RequestConfig{
 		Method:        http.MethodGet,
-		URL:           service.url(fmt.Sprintf("events?%s", params.Encode())),
+		Url:           service.url(fmt.Sprintf("events?%s", params.Encode())),
 		ResponseModel: &eventsResponse,
 		ErrorModel:    &eventsErrorResponse,
 	}
-	//fmt.Println(requestConfig.URL)
+	//fmt.Println(requestConfig.Url)
 	_, response, e := service.httpRequest(&requestConfig)
 	sync := eventsResponse.Sync
 	if sync == nil {
 		sync = eventsErrorResponse.Sync
 	}
 	return eventsResponse.Data, sync, response, e
-
-	/*
-		if syncToken == nil && response.StatusCode == 412 {
-			if eventsErrorResponse.Sync == nil {
-				return nil, "", errortools.ErrorMessage("eventsErrorResponse.Sync is nil")
-			}
-			return nil, *eventsErrorResponse.Sync, nil
-		} else if e != nil {
-			return nil, "", e
-		}
-		if eventsResponse.Sync == nil {
-			return nil, "", errortools.ErrorMessage("eventsResponse.Sync is nil")
-		}
-
-		return eventsResponse.Data, *eventsResponse.Sync, nil*/
 }

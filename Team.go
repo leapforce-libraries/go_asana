@@ -12,13 +12,13 @@ import (
 // Team stores Team from Service
 //
 type Team struct {
-	ID              string `json:"gid"`
+	Id              string `json:"gid"`
 	ResourceType    string `json:"resource_type"`
 	Name            string `json:"name"`
 	Description     string `json:"description"`
-	HTMLDescription string `json:"html_description"`
+	HtmlDescription string `json:"html_description"`
 	Organization    Object `json:"organization"`
-	PermalinkURL    string `json:"permalink_url"`
+	PermalinkUrl    string `json:"permalink_url"`
 }
 
 // GetTeams returns all teams
@@ -34,7 +34,7 @@ func (service *Service) GetTeamsByWorkspace(workspaceID string) ([]Team, *errort
 		_teams := []Team{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("organizations/%s/teams?%s", workspaceID, params.Encode())),
+			Url:           service.url(fmt.Sprintf("organizations/%s/teams?%s", workspaceID, params.Encode())),
 			ResponseModel: &_teams,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)

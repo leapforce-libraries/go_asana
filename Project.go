@@ -13,7 +13,7 @@ import (
 // Project stores Project from Service
 //
 type Project struct {
-	ID                  string                 `json:"gid"`
+	Id                  string                 `json:"gid"`
 	Name                string                 `json:"name"`
 	ResourceType        string                 `json:"resource_type"`
 	Archived            bool                   `json:"archived"`
@@ -23,7 +23,7 @@ type Project struct {
 	CustomFieldSettings []ObjectCompact        `json:"custom_field_settings"`
 	DefaultView         string                 `json:"default_view"`
 	DueOn               *a_types.DateString    `json:"due_on"`
-	HTMLNotes           string                 `json:"html_notes"`
+	HtmlNotes           string                 `json:"html_notes"`
 	IsTemplate          bool                   `json:"is_template"`
 	Members             []Object               `json:"members"`
 	ModifiedAt          a_types.DateTimeString `json:"modified_at"`
@@ -35,7 +35,7 @@ type Project struct {
 	Followers           []Object               `json:"followers"`
 	Icon                *string                `json:"icon"`
 	Owner               Object                 `json:"owner"`
-	PermalinkURL        string                 `json:"permalink_url"`
+	PermalinkUrl        string                 `json:"permalink_url"`
 	Team                Object                 `json:"team"`
 }
 
@@ -62,7 +62,7 @@ func (service *Service) GetProjects(config *GetProjectsConfig) ([]Project, *erro
 		_projects := []Project{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("projects?%s", params.Encode())),
+			Url:           service.url(fmt.Sprintf("projects?%s", params.Encode())),
 			ResponseModel: &_projects,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)

@@ -12,7 +12,7 @@ import (
 // User stores User from Service
 //
 type User struct {
-	ID           string   `json:"gid"`
+	Id           string   `json:"gid"`
 	ResourceType string   `json:"resource_type"`
 	Name         string   `json:"name"`
 	Email        string   `json:"email"`
@@ -54,7 +54,7 @@ func (service *Service) GetUsers(config *GetUsersConfig) ([]User, *errortools.Er
 		_users := []User{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("users?%s", params.Encode())),
+			Url:           service.url(fmt.Sprintf("users?%s", params.Encode())),
 			ResponseModel: &_users,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)

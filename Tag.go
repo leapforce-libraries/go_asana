@@ -12,12 +12,12 @@ import (
 // Tag stores Tag from Service
 //
 type Tag struct {
-	ID           string   `json:"gid"`
+	Id           string   `json:"gid"`
 	ResourceType string   `json:"resource_type"`
 	Color        string   `json:"color"`
 	Followers    []Object `json:"followers"`
 	Name         string   `json:"name"`
-	PermalinkURL string   `json:"permalink_url"`
+	PermalinkUrl string   `json:"permalink_url"`
 	Workspace    Object   `json:"workspace"`
 }
 
@@ -34,7 +34,7 @@ func (service *Service) GetTagsByWorkspace(workspaceID string) ([]Tag, *errortoo
 		_tags := []Tag{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("workspaces/%s/tags?%s", workspaceID, params.Encode())),
+			Url:           service.url(fmt.Sprintf("workspaces/%s/tags?%s", workspaceID, params.Encode())),
 			ResponseModel: &_tags,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)

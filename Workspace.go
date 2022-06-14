@@ -12,7 +12,7 @@ import (
 // Workspace stores Workspace from Service
 //
 type Workspace struct {
-	ID             string   `json:"gid"`
+	Id             string   `json:"gid"`
 	ResourceType   string   `json:"resource_type"`
 	Name           string   `json:"name"`
 	EmailDomains   []string `json:"email_domains"`
@@ -32,7 +32,7 @@ func (service *Service) GetWorkspaces() ([]Workspace, *errortools.Error) {
 		_workspaces := []Workspace{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("workspaces?%s", params.Encode())),
+			Url:           service.url(fmt.Sprintf("workspaces?%s", params.Encode())),
 			ResponseModel: &_workspaces,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)

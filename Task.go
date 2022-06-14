@@ -15,7 +15,7 @@ import (
 // Task stores Task from Service
 //
 type Task struct {
-	ID                    string                  `json:"gid"`
+	Id                    string                  `json:"gid"`
 	ResourceType          string                  `json:"resource_type"`
 	Name                  string                  `json:"name"`
 	ApprovalStatus        string                  `json:"approval_status"`
@@ -29,7 +29,7 @@ type Task struct {
 	DueAt                 *a_types.DateTimeString `json:"due_at"`
 	DueOn                 *a_types.DateString     `json:"due_on"`
 	External              External                `json:"external"`
-	HTMLNotes             string                  `json:"html_notes"`
+	HtmlNotes             string                  `json:"html_notes"`
 	IsRenderedAsSeparator bool                    `json:"is_rendered_as_separator"`
 	Liked                 bool                    `json:"liked"`
 	Likes                 []UserList              `json:"likes"`
@@ -44,7 +44,7 @@ type Task struct {
 	CustomFields          []CustomFieldTask       `json:"custom_fields"`
 	Followers             []Object                `json:"followers"`
 	Parent                *Object                 `json:"parent"`
-	PermalinkURL          string                  `json:"permalink_url"`
+	PermalinkUrl          string                  `json:"permalink_url"`
 	Projects              []Object                `json:"projects"`
 	Tags                  []Object                `json:"tags"`
 	Workspace             Object                  `json:"workspace"`
@@ -74,7 +74,7 @@ func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Er
 		_tasks := []Task{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("tasks?%s", params.Encode())),
+			Url:           service.url(fmt.Sprintf("tasks?%s", params.Encode())),
 			ResponseModel: &_tasks,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)
@@ -109,7 +109,7 @@ func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
 		_tasks := []Task{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
+			Url:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
 			ResponseModel: &_tasks,
 		}
 		_, _, nextPage, e := service.getData(&requestConfig)
@@ -178,7 +178,7 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 		_tasks := []Task{}
 
 		requestConfig := go_http.RequestConfig{
-			URL:           service.url(fmt.Sprintf("workspaces/%s/tasks/search?%s", config.WorkspaceID, params.Encode())),
+			Url:           service.url(fmt.Sprintf("workspaces/%s/tasks/search?%s", config.WorkspaceID, params.Encode())),
 			ResponseModel: &_tasks,
 		}
 		_, _, _, e := service.getData(&requestConfig)
@@ -208,7 +208,7 @@ type DeleteTaskConfig struct {
 func (service *Service) DeleteTask(config *DeleteTaskConfig) *errortools.Error {
 	requestConfig := go_http.RequestConfig{
 		Method: http.MethodDelete,
-		URL:    service.url(fmt.Sprintf("tasks/%s", config.TaskID)),
+		Url:    service.url(fmt.Sprintf("tasks/%s", config.TaskID)),
 	}
 	_, _, e := service.httpRequest(&requestConfig)
 	if e != nil {
