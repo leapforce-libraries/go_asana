@@ -4,21 +4,21 @@ package asana
 //
 type CustomFieldProject struct {
 	ID              string       `json:"gid"`
-	ResourceType    string       `json:"resource_type"`
 	DisplayValue    string       `json:"display_value"`
 	Enabled         bool         `json:"enabled"`
 	EnumOptions     []EnumOption `json:"enum_options"`
 	Name            string       `json:"name"`
 	NumberValue     float64      `json:"number_value"`
 	ResourceSubtype string       `json:"resource_subtype"`
+	ResourceType    string       `json:"resource_type"`
 	TextValue       string       `json:"text_value"`
+	Type            string       `json:"type"`
 }
 
 // CustomFieldTask stores CustomFieldTask from Asana
 //
 type CustomFieldTask struct {
 	ID                      string        `json:"gid"`
-	ResourceType            string        `json:"resource_type"`
 	CreatedBy               Object        `json:"created_by"`
 	CurrencyCode            *string       `json:"currency_code"`
 	CustomLabel             *string       `json:"custom_label"`
@@ -35,5 +35,7 @@ type CustomFieldTask struct {
 	NumberValue             *float64      `json:"number_value"`
 	Precision               *int64        `json:"precision"`
 	ResourceSubtype         string        `json:"resource_subtype"`
+	ResourceType            string        `json:"resource_type"`
 	TextValue               *string       `json:"text_value"`
+	Type                    string        `json:"type"`
 }
