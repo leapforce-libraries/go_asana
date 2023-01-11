@@ -58,7 +58,7 @@ type GetTasksConfig struct {
 // GetTasks returns all tasks
 //
 func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Error) {
-	tasks := []Task{}
+	var tasks []Task
 
 	params := url.Values{}
 	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
@@ -71,7 +71,7 @@ func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Er
 	}
 
 	for {
-		_tasks := []Task{}
+		var _tasks []Task
 
 		requestConfig := go_http.RequestConfig{
 			Url:           service.url(fmt.Sprintf("tasks?%s", params.Encode())),
@@ -100,13 +100,13 @@ func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Er
 // GetSubTasks returns all subtasks of a parent task
 //
 func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
-	tasks := []Task{}
+	var tasks []Task
 
 	params := url.Values{}
 	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
 
 	for {
-		_tasks := []Task{}
+		var _tasks []Task
 
 		requestConfig := go_http.RequestConfig{
 			Url:           service.url(fmt.Sprintf("tasks/%s/subtasks?%s", taskID, params.Encode())),
@@ -154,7 +154,7 @@ type SearchTasksConfig struct {
 }
 
 func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errortools.Error) {
-	tasks := []Task{}
+	var tasks []Task
 
 	params := url.Values{}
 	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
@@ -175,7 +175,7 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 	}
 
 	for {
-		_tasks := []Task{}
+		var _tasks []Task
 
 		requestConfig := go_http.RequestConfig{
 			Url:           service.url(fmt.Sprintf("workspaces/%s/tasks/search?%s", config.WorkspaceID, params.Encode())),
@@ -216,4 +216,52 @@ func (service *Service) DeleteTask(config *DeleteTaskConfig) *errortools.Error {
 	}
 
 	return nil
+}
+
+type NewTask struct {
+	ApprovalStatus  string                  `json:"approval_status,omitempty"`
+	Assignee        string                  `json:"assignee,omitempty"`
+	AssigneeSection string                  `json:"assignee_section,omitempty"`
+	AssigneeStatus  string                  `json:"assignee_status,omitempty"`
+	Completed       bool                    `json:"completed,omitempty"`
+	CompletedBy     *Object                 `json:"completed_by,omitempty"`
+	CustomFields    map[string]string       `json:"custom_fields,omitempty"`
+	DueAt           *a_types.DateTimeString `json:"due_at,omitempty"`
+	DueOn           *a_types.DateString     `json:"due_on,omitempty"`
+	External        *External               `json:"external,omitempty"`
+	Followers       []string                `json:"followers,omitempty"`
+	HtmlNotes       string                  `json:"html_notes,omitempty"`
+	Liked           bool                    `json:"liked,omitempty"`
+	Name            string                  `json:"name,omitempty"`
+	Notes           string                  `json:"notes,omitempty"`
+	Parent          string                  `json:"parent,omitempty"`
+	Projects        []string                `json:"projects,omitempty"`
+	ResourceSubtype string                  `json:"resource_subtype,omitempty"`
+	StartAt         *a_types.DateTimeString `json:"start_at,omitempty"`
+	StartOn         *a_types.DateString     `json:"start_on,omitempty"`
+	Tags            []string                `json:"tags,omitempty"`
+	Workspace       string                  `json:"workspace,omitempty"`
+}
+
+func (service *Service) CreateTask(task *NewTask) (*Task, *errortools.Error) {
+	if task == nil {
+		return nil, nil
+	}
+
+	var createdTask Task
+
+	requestConfig := go_http.RequestConfig{
+		Method: http.MethodPost,
+		Url:    service.url("tasks"),
+		BodyModel: struct {
+			Data *NewTask `json:"data"`
+		}{task},
+		ResponseModel: &createdTask,
+	}
+	_, _, e := service.httpRequest(&requestConfig)
+	if e != nil {
+		return nil, e
+	}
+
+	return &createdTask, nil
 }
