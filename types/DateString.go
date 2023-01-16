@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	utilities "github.com/leapforce-libraries/go_utilities"
 	"time"
 
 	"cloud.google.com/go/civil"
@@ -45,6 +46,14 @@ func (d *DateString) UnmarshalJSON(b []byte) error {
 
 	*d = DateString(civil.DateOf(_t))
 	return nil
+}
+
+func (d *DateString) MarshalJSON() ([]byte, error) {
+	if d == nil {
+		return json.Marshal(nil)
+	}
+
+	return json.Marshal(utilities.DateToTime(civil.Date(*d)).Format(layoutDate))
 }
 
 func (d *DateString) ValuePtr() *civil.Date {
