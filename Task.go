@@ -25,6 +25,7 @@ type Task struct {
 	CompletedAt           string                  `json:"completed_at"`
 	CompletedBy           Object                  `json:"completed_by"`
 	CreatedAt             a_types.DateTimeString  `json:"created_at"`
+	CreatedBy             Object                  `json:"created_by"`
 	Dependencies          []ObjectCompact         `json:"dependencies"`
 	Dependents            []ObjectCompact         `json:"dependents"`
 	DueAt                 *a_types.DateTimeString `json:"due_at"`
