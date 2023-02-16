@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	a_types "github.com/leapforce-libraries/go_asana/types"
@@ -149,15 +150,22 @@ type SearchTasksConfig struct {
 	CreatedAtAfter   *time.Time
 	ModifiedAtBefore *time.Time
 	ModifiedAtAfter  *time.Time
-	//SortByField      *SortByField
-	//SortAscending    *bool
+	Fields           *[]string
+	Values           *url.Values
 }
 
 func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errortools.Error) {
 	var tasks []Task
 
 	params := url.Values{}
-	params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
+	if config.Values != nil {
+		params = *config.Values
+	}
+	if config.Fields != nil {
+		params.Set("opt_fields", strings.Join(*config.Fields, ",")+",created_at")
+	} else {
+		params.Set("opt_fields", utilities.GetTaggedTagNames("json", Task{}))
+	}
 	params.Set("limit", fmt.Sprintf("%v", limitDefault))
 	params.Set("sort_by", "created_at")
 	params.Set("sort_ascending", "true")
