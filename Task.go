@@ -146,13 +146,15 @@ const (
 )*/
 
 type SearchTasksConfig struct {
-	WorkspaceID      string
-	CreatedAtBefore  *time.Time
-	CreatedAtAfter   *time.Time
-	ModifiedAtBefore *time.Time
-	ModifiedAtAfter  *time.Time
-	Fields           *[]string
-	Values           *url.Values
+	WorkspaceID       string
+	CreatedAtBefore   *time.Time
+	CreatedAtAfter    *time.Time
+	ModifiedAtBefore  *time.Time
+	ModifiedAtAfter   *time.Time
+	CompletedAtBefore *time.Time
+	CompletedAtAfter  *time.Time
+	Fields            *[]string
+	Values            *url.Values
 }
 
 func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errortools.Error) {
@@ -182,6 +184,12 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 	if config.ModifiedAtAfter != nil {
 		params.Set("modified_at.after", config.ModifiedAtAfter.Format(DateTimeLayout))
 	}
+	if config.CompletedAtBefore != nil {
+		params.Set("completed_at.before", config.CompletedAtBefore.Format(DateTimeLayout))
+	}
+	if config.CompletedAtBefore != nil {
+		params.Set("completed_at.after", config.CompletedAtBefore.Format(DateTimeLayout))
+	}
 
 	for {
 		var _tasks []Task
@@ -190,6 +198,7 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 			Url:           service.url(fmt.Sprintf("workspaces/%s/tasks/search?%s", config.WorkspaceID, params.Encode())),
 			ResponseModel: &_tasks,
 		}
+		fmt.Println(requestConfig.Url)
 		_, _, _, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
