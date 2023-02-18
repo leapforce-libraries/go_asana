@@ -198,7 +198,6 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 			Url:           service.url(fmt.Sprintf("workspaces/%s/tasks/search?%s", config.WorkspaceID, params.Encode())),
 			ResponseModel: &_tasks,
 		}
-		fmt.Println(requestConfig.Url)
 		_, _, _, e := service.getData(&requestConfig)
 		if e != nil {
 			return nil, e
