@@ -188,7 +188,7 @@ func (service *Service) SearchTasks(config *SearchTasksConfig) ([]Task, *errorto
 		params.Set("completed_at.before", config.CompletedAtBefore.Format(DateTimeLayout))
 	}
 	if config.CompletedAtAfter != nil {
-		params.Set("completed_at.after", config.CompletedAtBefore.Format(DateTimeLayout))
+		params.Set("completed_at.after", config.CompletedAtAfter.Format(DateTimeLayout))
 	}
 
 	for {
