@@ -53,14 +53,21 @@ type Task struct {
 
 type GetTaskConfig struct {
 	TaskId string
+	Fields *string
 }
 
 // GetTask returns a specific tasks
 func (service *Service) GetTask(config *GetTaskConfig) (*Task, *errortools.Error) {
+	var values = url.Values{}
+
 	var task Task
 
+	if config.Fields != nil {
+		values.Set("opt_fields", *config.Fields)
+	}
+
 	requestConfig := go_http.RequestConfig{
-		Url:           service.url(fmt.Sprintf("tasks/%s", config.TaskId)),
+		Url:           service.url(fmt.Sprintf("tasks/%s?%s", config.TaskId, values.Encode())),
 		ResponseModel: &task,
 	}
 	_, _, _, e := service.getData(&requestConfig)
