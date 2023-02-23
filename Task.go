@@ -14,7 +14,6 @@ import (
 )
 
 // Task stores Task from Service
-//
 type Task struct {
 	Id                    string                  `json:"gid"`
 	ResourceType          string                  `json:"resource_type"`
@@ -52,13 +51,31 @@ type Task struct {
 	Workspace             Object                  `json:"workspace"`
 }
 
+type GetTaskConfig struct {
+	TaskId string
+}
+
+// GetTask returns a specific tasks
+func (service *Service) GetTask(config *GetTaskConfig) (*Task, *errortools.Error) {
+	var task Task
+
+	requestConfig := go_http.RequestConfig{
+		Url:           service.url(fmt.Sprintf("tasks/%s", config.TaskId)),
+		ResponseModel: &task,
+	}
+	_, _, _, e := service.getData(&requestConfig)
+	if e != nil {
+		return nil, e
+	}
+	return &task, nil
+}
+
 type GetTasksConfig struct {
 	ProjectID     *string
 	ModifiedSince *time.Time
 }
 
 // GetTasks returns all tasks
-//
 func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Error) {
 	var tasks []Task
 
@@ -100,7 +117,6 @@ func (service *Service) GetTasks(config *GetTasksConfig) ([]Task, *errortools.Er
 }
 
 // GetSubTasks returns all subtasks of a parent task
-//
 func (service *Service) GetSubTasks(taskID string) ([]Task, *errortools.Error) {
 	var tasks []Task
 
