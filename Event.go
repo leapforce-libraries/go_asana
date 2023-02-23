@@ -1,7 +1,6 @@
 package asana
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -25,15 +24,14 @@ type EventsErrorResponse struct {
 }
 
 // Event stores Event from Service
-//
 type Event struct {
 	Action string `json:"action"`
 	Change struct {
-		Action       string          `json:"action"`
-		AddedValue   json.RawMessage `json:"added_value"`
-		Field        string          `json:"field"`
-		NewValue     json.RawMessage `json:"new_value"`
-		RemovedValue json.RawMessage `json:"removed_value"`
+		Action       string `json:"action"`
+		AddedValue   string `json:"added_value"`
+		Field        string `json:"field"`
+		NewValue     string `json:"new_value"`
+		RemovedValue string `json:"removed_value"`
 	} `json:"change"`
 	CreatedAt a_types.DateTimeString `json:"created_at"`
 	Parent    Object                 `json:"parent"`
@@ -42,7 +40,6 @@ type Event struct {
 }
 
 // GetEvents returns all events
-//
 func (service *Service) GetEventsByProject(projectID string, syncToken *string) (*[]Event, *string, *http.Response, *errortools.Error) {
 	eventsResponse := EventsResponse{}
 	eventsErrorResponse := EventsErrorResponse{}
