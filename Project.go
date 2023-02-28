@@ -11,7 +11,6 @@ import (
 )
 
 // Project stores Project from Service
-//
 type Project struct {
 	Id                  string                 `json:"gid"`
 	Name                string                 `json:"name"`
@@ -41,10 +40,10 @@ type Project struct {
 
 type GetProjectsConfig struct {
 	WorkspaceID *string
+	Archived    *bool
 }
 
 // GetProjects returns all projects
-//
 func (service *Service) GetProjects(config *GetProjectsConfig) ([]Project, *errortools.Error) {
 	projects := []Project{}
 
@@ -55,6 +54,9 @@ func (service *Service) GetProjects(config *GetProjectsConfig) ([]Project, *erro
 		if config.WorkspaceID != nil {
 			params.Set("workspace", *config.WorkspaceID)
 			params.Set("limit", fmt.Sprintf("%v", limitDefault)) // pagination only if workspace is specified
+		}
+		if config.Archived != nil {
+			params.Set("archived", fmt.Sprintf("%v", *config.Archived))
 		}
 	}
 

@@ -19,21 +19,18 @@ const (
 )
 
 // type
-//
 type Service struct {
 	bearerToken string
 	httpService *go_http.Service
 }
 
 // Response represents highest level of exactonline api response
-//
 type Response struct {
 	Data     *json.RawMessage `json:"data"`
 	NextPage *NextPage        `json:"next_page"`
 }
 
 // NextPage contains info for batched data retrieval
-//
 type NextPage struct {
 	Offset string `json:"offset"`
 	Path   string `json:"path"`
@@ -96,7 +93,7 @@ func (service *Service) getData(requestConfig *go_http.RequestConfig) (*http.Req
 	_response := Response{}
 
 	_requestConfig := go_http.RequestConfig{
-		Method:        http.MethodGet,
+		Method:        requestConfig.Method,
 		Url:           requestConfig.Url,
 		ResponseModel: &_response,
 	}
