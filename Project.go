@@ -28,6 +28,7 @@ type Project struct {
 	ModifiedAt          a_types.DateTimeString `json:"modified_at"`
 	Notes               string                 `json:"notes"`
 	Public              bool                   `json:"public"`
+	PrivacySetting      string                 `json:"privacy_setting"`
 	StartOn             *a_types.DateString    `json:"start_on"`
 	Workspace           Object                 `json:"workspace"`
 	CustomFields        []CustomFieldProject   `json:"custom_fields"`
