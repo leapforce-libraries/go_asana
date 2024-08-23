@@ -306,7 +306,7 @@ func (service *Service) CreateTask(task *NewTask) (*Task, *errortools.Error) {
 	return &createdTask, nil
 }
 
-func (service *Service) UpdateTask(taskId int64, task *NewTask) (*Task, *errortools.Error) {
+func (service *Service) UpdateTask(taskId string, task *NewTask) (*Task, *errortools.Error) {
 	if task == nil {
 		return nil, nil
 	}
@@ -315,7 +315,7 @@ func (service *Service) UpdateTask(taskId int64, task *NewTask) (*Task, *errorto
 
 	requestConfig := go_http.RequestConfig{
 		Method: http.MethodPut,
-		Url:    service.url(fmt.Sprintf("tasks/%v", taskId)),
+		Url:    service.url(fmt.Sprintf("tasks/%s", taskId)),
 		BodyModel: struct {
 			Data *NewTask `json:"data"`
 		}{task},
